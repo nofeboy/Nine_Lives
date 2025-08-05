@@ -1,0 +1,290 @@
+﻿{
+  "events": [
+    {
+      "id": "intro_1",
+      "description": "당신은 어두운 방에서 눈을 뜬다.\n차가운 금속 냄새가 코끝을 스친다.\n머릿속에 희미한 기억이 스친다... 배신, 죽음, 그리고 9개의 새로운 삶.",
+      "choices": [
+        {
+          "text": "문을 열고 나간다",
+          "reqStrength": 1,
+          "reqHacking": 0,
+          "hpDelta": -1,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "combat_1",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "주위를 살핀다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "intro_2",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "테스트1",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "intro_2",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "테스트2",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "intro_2",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "intro_2",
+      "description": "벽에는 네온사인 불빛이 스며든다. 바닥엔 피가 말라붙어 있다. 구석에서 작은 메모리 칩을 발견한다.",
+      "choices": [
+        {
+          "text": "메모리 칩을 획득한다",
+          "reqStrength": 0,
+          "reqHacking": 1,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "street_1",
+          "itemGains": [ [ "메모리칩", 1 ] ],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "바닥의 흔적을 조사한다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": -1,
+          "moneyDelta": 0,
+          "nextEventId": "clue_1",
+          "itemGains": [],
+          "informationGains": [ [ "추적흔적", 1 ] ],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "combat_1",
+      "description": "갑자기 문이 열리자, 무장 경비가 총을 겨눈다! '침입자 발견!' 경보음이 울린다.",
+      "choices": [
+        {
+          "text": "그냥 돌격한다 (무력 2 필요)",
+          "reqStrength": 2,
+          "reqHacking": 0,
+          "hpDelta": -2,
+          "sanityDelta": 0,
+          "moneyDelta": 100,
+          "nextEventId": "combat_2",
+          "itemGains": [ [ "보안카드", 1 ] ],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "도망친다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": -1,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "escape_1",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "clue_1",
+      "description": "피자국은 누군가를 끌고 간 흔적이다. 끝은 문 앞에서 끊긴다. 당신의 이전 몸이었을지도 모른다...",
+      "choices": [
+        {
+          "text": "문을 열고 따라간다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": -1,
+          "moneyDelta": 0,
+          "nextEventId": "combat_1",
+          "itemGains": [],
+          "informationGains": [ [ "과거기억", 1 ] ],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "street_1",
+      "description": "창밖엔 붉은 네온과 사이보그들이 활보하는 거리. 2033년의 서울, 기업들이 지배하는 세상이다.",
+      "choices": [
+        {
+          "text": "거리로 내려간다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "street_explore",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "street_explore",
+      "description": "네온사인이 깜빡이는 거리에서 당신은 선택의 기로에 선다. 멀리서 기업 드론들의 순찰 소리가 들린다.",
+      "choices": [
+        {
+          "text": "지하 해커 바에 간다",
+          "reqStrength": 0,
+          "reqHacking": 1,
+          "hpDelta": 0,
+          "sanityDelta": 1,
+          "moneyDelta": -50,
+          "nextEventId": "hacker_bar",
+          "itemGains": [],
+          "informationGains": [ [ "해커연결", 1 ] ],
+          "requiredItems": []
+        },
+        {
+          "text": "뒷골목 무기상을 찾는다",
+          "reqStrength": 1,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": -100,
+          "nextEventId": "weapon_shop",
+          "itemGains": [ [ "EMP수류탄", 2 ] ],
+          "informationGains": [],
+          "requiredItems": []
+        },
+        {
+          "text": "기업 본사로 직진한다",
+          "reqStrength": 2,
+          "reqHacking": 2,
+          "hpDelta": -3,
+          "sanityDelta": -2,
+          "moneyDelta": 0,
+          "nextEventId": "corp_assault",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "escape_1",
+      "description": "당신은 어둠 속으로 몸을 던졌다. 기업의 추적은 아직 끝나지 않았다... 하지만 아직 8개의 삶이 남아있다.",
+      "choices": []
+    },
+    {
+      "id": "combat_2",
+      "description": "경비를 제압했지만 더 많은 적들이 몰려온다. 이곳을 빠져나가야 한다!",
+      "choices": [
+        {
+          "text": "EMP수류탄 사용 (필요)",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "successful_escape",
+          "itemGains": [],
+          "informationGains": [ [ "보안시스템", 1 ] ],
+          "requiredItems": [ "EMP수류탄" ]
+        },
+        {
+          "text": "정면돌파한다",
+          "reqStrength": 3,
+          "reqHacking": 0,
+          "hpDelta": -4,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "bloody_escape",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "hacker_bar",
+      "description": "어둠 속에서 키보드 소리만 들리는 지하 바. 한 해커가 당신을 주목한다. '새로운 클론이군. 기업과 맞설 준비가 됐나?'",
+      "choices": [
+        {
+          "text": "해킹 스킬을 배운다 (+해킹)",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": -200,
+          "nextEventId": "skill_up_hack",
+          "itemGains": [],
+          "informationGains": [ [ "해킹기술", 1 ] ],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "weapon_shop",
+      "description": "음침한 뒷골목의 무기상. 사이보그 팔을 가진 상인이 당신을 맞는다. '복수할 거라면 제대로 된 무기가 필요하지.'",
+      "choices": [
+        {
+          "text": "근접 무기를 산다 (+무력)",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": -150,
+          "nextEventId": "skill_up_str",
+          "itemGains": [ [ "사이버칼", 1 ] ],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "clone_revival",
+      "description": "의식이 새로운 클론 바디로 전송되었다. 당신은 안전가옥에서 깨어난다. 복수는 계속되어야 한다.",
+      "choices": [
+        {
+          "text": "다시 시작한다",
+          "reqStrength": 0,
+          "reqHacking": 0,
+          "hpDelta": 0,
+          "sanityDelta": 0,
+          "moneyDelta": 0,
+          "nextEventId": "street_explore",
+          "itemGains": [],
+          "informationGains": [],
+          "requiredItems": []
+        }
+      ]
+    },
+    {
+      "id": "complete_death",
+      "description": "마지막 클론 바디마저 파괴되었다. 당신의 복수는 여기서 끝난다...",
+      "choices": []
+    }
+  ]
+}
