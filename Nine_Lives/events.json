@@ -2,289 +2,334 @@
   "events": [
     {
       "id": "intro_1",
-      "description": "당신은 어두운 방에서 눈을 뜬다.\n차가운 금속 냄새가 코끝을 스친다.\n머릿속에 희미한 기억이 스친다... 배신, 죽음, 그리고 9개의 새로운 삶.",
+      "type": "random",
+      "description": "네온 불빛이 흐릿한 폐공장, 의식이 돌아온다. 손목엔 낡은 칩이 박혀 있다. 어떻게 할까?",
       "choices": [
         {
-          "text": "문을 열고 나간다",
-          "reqStrength": 1,
-          "reqHacking": 0,
+          "text": "칩을 강제로 뽑는다.",
+          "nextEventId": "chip_pulled"
+        },
+        {
+          "text": "근처 단말기를 해킹한다.",
+          "nextEventId": "hack_terminal"
+        },
+        {
+          "text": "어둠 속을 살핀다.",
+          "nextEventId": "find_item"
+        },
+        {
+          "text": "방을 나간다.",
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "chip_pulled",
+      "type": "story",
+      "description": "고통 속에서 칩을 뽑아내자 체력은 깎였지만, 자유로워진 느낌이다.",
+      "choices": [
+        {
+          "text": "밖으로 나간다.",
           "hpDelta": -1,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "combat_1",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        },
-        {
-          "text": "주위를 살핀다",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "intro_2",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        },
-        {
-          "text": "테스트1",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "intro_2",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        },
-        {
-          "text": "테스트2",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "intro_2",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
+          "nextEventId": "street_enter"
         }
       ]
     },
     {
-      "id": "intro_2",
-      "description": "벽에는 네온사인 불빛이 스며든다. 바닥엔 피가 말라붙어 있다. 구석에서 작은 메모리 칩을 발견한다.",
+      "id": "hack_terminal",
+      "type": "story",
+      "description": "터미널을 해킹, 옛날 갱단의 암호를 일부 복원했다. 해킹력이 오른다.",
       "choices": [
         {
-          "text": "메모리 칩을 획득한다",
-          "reqStrength": 0,
-          "reqHacking": 1,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "street_1",
-          "itemGains": [ [ "메모리칩", 1 ] ],
-          "informationGains": [],
-          "requiredItems": []
-        },
-        {
-          "text": "바닥의 흔적을 조사한다",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": -1,
-          "moneyDelta": 0,
-          "nextEventId": "clue_1",
-          "itemGains": [],
-          "informationGains": [ [ "추적흔적", 1 ] ],
-          "requiredItems": []
+          "text": "밖으로 나간다.",
+          "hackingDelta": 1,
+          "nextEventId": "street_enter"
         }
       ]
     },
     {
-      "id": "combat_1",
-      "description": "갑자기 문이 열리자, 무장 경비가 총을 겨눈다! '침입자 발견!' 경보음이 울린다.",
+      "id": "find_item",
+      "type": "story",
+      "description": "쓰레기 더미에서 '붉은 에너지 캡슐'을 찾았다.",
       "choices": [
         {
-          "text": "그냥 돌격한다 (무력 2 필요)",
-          "reqStrength": 2,
-          "reqHacking": 0,
+          "text": "챙긴다.",
+          "itemGains": [ [ "붉은 에너지 캡슐", 1 ] ],
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "street_enter",
+      "type": "random",
+      "description": "낡은 공장을 벗어나자, 네온 거리와 암시장이 눈앞에 펼쳐진다.",
+      "choices": [
+        {
+          "text": "사이버갱단을 피해 뒷골목으로.",
+          "nextEventId": "alley_meet"
+        },
+        {
+          "text": "블랙마켓으로 간다.",
+          "nextEventId": "blackmarket"
+        },
+        {
+          "text": "드론이 순찰하는 대로로.",
+          "nextEventId": "drone_encounter"
+        },
+        {
+          "text": "거리의 노숙자에게 말을 건다.",
+          "nextEventId": "homeless_event"
+        }
+      ]
+    },
+    {
+      "id": "alley_meet",
+      "type": "random",
+      "description": "골목 어귀에서 수상한 인물과 마주친다.",
+      "choices": [
+        {
+          "text": "도망친다.",
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "싸움을 건다.",
+          "nextEventId": "brawl"
+        },
+        {
+          "text": "돈을 준다.",
+          "moneyDelta": -1,
+          "nextEventId": "alley_friend"
+        },
+        {
+          "text": "정체를 묻는다.",
+          "nextEventId": "get_info"
+        }
+      ]
+    },
+    {
+      "id": "brawl",
+      "type": "story",
+      "description": "짧은 난투 끝에 근력이 상승했다. 하지만 상처도 남았다.",
+      "choices": [
+        {
+          "text": "골목을 빠져나간다.",
+          "strengthDelta": 1,
+          "hpDelta": -1,
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "alley_friend",
+      "type": "story",
+      "description": "그는 정보를 넘겨주고 사라진다.",
+      "choices": [
+        {
+          "text": "정보를 읽는다.",
+          "informationGains": [ [ "비밀 네트워크", 1 ] ],
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "get_info",
+      "type": "story",
+      "description": "짧은 대화 끝에, 사이버마피아의 루머를 들었다.",
+      "choices": [
+        {
+          "text": "기록한다.",
+          "informationGains": [ [ "마피아 루머", 1 ] ],
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "blackmarket",
+      "type": "random",
+      "description": "네온 간판 아래 블랙마켓. 원하는 물건이 많다.",
+      "choices": [
+        {
+          "text": "사이버팔을 산다.",
+          "moneyDelta": -2,
+          "itemGains": [ [ "사이버팔", 1 ] ],
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "회복약을 산다.",
+          "moneyDelta": -1,
+          "itemGains": [ [ "회복약", 1 ] ],
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "비밀 정보를 산다.",
+          "moneyDelta": -2,
+          "informationGains": [ [ "해킹코드", 1 ] ],
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "그냥 나온다.",
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "drone_encounter",
+      "type": "random",
+      "description": "경찰 드론이 시야에 들어온다. 어떻게 할까?",
+      "choices": [
+        {
+          "text": "드론과 싸운다.",
+          "nextEventId": "fight_drone"
+        },
+        {
+          "text": "숨는다.",
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "드론을 해킹한다.",
+          "nextEventId": "drone_hack"
+        }
+      ]
+    },
+    {
+      "id": "fight_drone",
+      "type": "story",
+      "description": "드론을 박살냈지만 부상을 입었다. 근력이 올랐다.",
+      "choices": [
+        {
+          "text": "빠져나온다.",
+          "strengthDelta": 1,
+          "hpDelta": -1,
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "drone_hack",
+      "type": "story",
+      "description": "드론 해킹 성공! 해킹력과 기밀 정보 획득.",
+      "choices": [
+        {
+          "text": "데이터를 챙긴다.",
+          "hackingDelta": 1,
+          "informationGains": [ [ "드론코드", 1 ] ],
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "homeless_event",
+      "type": "random",
+      "description": "노숙자가 정보를 줄 듯 말 듯 넌지시 손을 내민다.",
+      "choices": [
+        {
+          "text": "돈을 건넨다.",
+          "moneyDelta": -1,
+          "nextEventId": "homeless_info"
+        },
+        {
+          "text": "공격한다.",
+          "hpDelta": -1,
+          "nextEventId": "street_enter"
+        },
+        {
+          "text": "무시한다.",
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "homeless_info",
+      "type": "story",
+      "description": "노숙자에게서 뜻밖의 해킹 정보를 얻었다.",
+      "choices": [
+        {
+          "text": "정보를 챙긴다.",
+          "informationGains": [ [ "백도어 위치", 1 ] ],
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "forced_strength3",
+      "type": "forced",
+      "description": "근력 3 이상! 사이버갱단 보스가 길을 막는다.",
+      "condition": { "stats": { "strength": { "min": 3 } } },
+      "choices": [
+        {
+          "text": "정면승부!",
+          "hpDelta": -1,
+          "moneyDelta": 3,
+          "nextEventId": "boss_info"
+        },
+        {
+          "text": "회피한다.",
           "hpDelta": -2,
-          "sanityDelta": 0,
-          "moneyDelta": 100,
-          "nextEventId": "combat_2",
-          "itemGains": [ [ "보안카드", 1 ] ],
-          "informationGains": [],
-          "requiredItems": []
+          "nextEventId": "street_enter"
+        }
+      ]
+    },
+    {
+      "id": "boss_info",
+      "type": "story",
+      "description": "보스를 쓰러뜨리고 기밀 데이터 칩을 빼앗았다.",
+      "choices": [
+        {
+          "text": "칩을 분석한다.",
+          "informationGains": [ [ "보스 데이터", 1 ] ],
+          "nextEventId": "final_path"
+        }
+      ]
+    },
+    {
+      "id": "final_path",
+      "type": "random",
+      "description": "네온시티 중심가, 마지막 전투의 그림자가 드리운다.",
+      "choices": [
+        {
+          "text": "중앙 게이트로 돌진!",
+          "nextEventId": "forced_turn20"
         },
         {
-          "text": "도망친다",
-          "reqStrength": 0,
-          "reqHacking": 0,
+          "text": "은밀하게 잠입.",
+          "nextEventId": "stealth_entry"
+        }
+      ]
+    },
+    {
+      "id": "stealth_entry",
+      "type": "story",
+      "description": "성공적으로 잠입했지만, 에너지를 소모했다.",
+      "choices": [
+        {
+          "text": "결전을 준비한다.",
           "hpDelta": -1,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "escape_1",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
+          "nextEventId": "forced_turn20"
         }
       ]
     },
     {
-      "id": "clue_1",
-      "description": "피자국은 누군가를 끌고 간 흔적이다. 끝은 문 앞에서 끊긴다. 당신의 이전 몸이었을지도 모른다...",
+      "id": "forced_turn20",
+      "type": "forced",
+      "description": "20턴 이상 버텼다! 보스룸에 진입한다.",
+      "condition": { "minTurns": 20 },
       "choices": [
         {
-          "text": "문을 열고 따라간다",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": -1,
-          "moneyDelta": 0,
-          "nextEventId": "combat_1",
-          "itemGains": [],
-          "informationGains": [ [ "과거기억", 1 ] ],
-          "requiredItems": []
+          "text": "최종 보스와 대면!",
+          "nextEventId": "final_boss"
         }
       ]
     },
     {
-      "id": "street_1",
-      "description": "창밖엔 붉은 네온과 사이보그들이 활보하는 거리. 2033년의 서울, 기업들이 지배하는 세상이다.",
+      "id": "final_boss",
+      "type": "story",
+      "description": "사이버네틱 보스와의 사투 끝, 네온시티의 전설이 되었다!",
       "choices": [
         {
-          "text": "거리로 내려간다",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "street_explore",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
+          "text": "게임 종료",
+          "nextEventId": "END"
         }
       ]
-    },
-    {
-      "id": "street_explore",
-      "description": "네온사인이 깜빡이는 거리에서 당신은 선택의 기로에 선다. 멀리서 기업 드론들의 순찰 소리가 들린다.",
-      "choices": [
-        {
-          "text": "지하 해커 바에 간다",
-          "reqStrength": 0,
-          "reqHacking": 1,
-          "hpDelta": 0,
-          "sanityDelta": 1,
-          "moneyDelta": -50,
-          "nextEventId": "hacker_bar",
-          "itemGains": [],
-          "informationGains": [ [ "해커연결", 1 ] ],
-          "requiredItems": []
-        },
-        {
-          "text": "뒷골목 무기상을 찾는다",
-          "reqStrength": 1,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": -100,
-          "nextEventId": "weapon_shop",
-          "itemGains": [ [ "EMP수류탄", 2 ] ],
-          "informationGains": [],
-          "requiredItems": []
-        },
-        {
-          "text": "기업 본사로 직진한다",
-          "reqStrength": 2,
-          "reqHacking": 2,
-          "hpDelta": -3,
-          "sanityDelta": -2,
-          "moneyDelta": 0,
-          "nextEventId": "corp_assault",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        }
-      ]
-    },
-    {
-      "id": "escape_1",
-      "description": "당신은 어둠 속으로 몸을 던졌다. 기업의 추적은 아직 끝나지 않았다... 하지만 아직 8개의 삶이 남아있다.",
-      "choices": []
-    },
-    {
-      "id": "combat_2",
-      "description": "경비를 제압했지만 더 많은 적들이 몰려온다. 이곳을 빠져나가야 한다!",
-      "choices": [
-        {
-          "text": "EMP수류탄 사용 (필요)",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "successful_escape",
-          "itemGains": [],
-          "informationGains": [ [ "보안시스템", 1 ] ],
-          "requiredItems": [ "EMP수류탄" ]
-        },
-        {
-          "text": "정면돌파한다",
-          "reqStrength": 3,
-          "reqHacking": 0,
-          "hpDelta": -4,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "bloody_escape",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        }
-      ]
-    },
-    {
-      "id": "hacker_bar",
-      "description": "어둠 속에서 키보드 소리만 들리는 지하 바. 한 해커가 당신을 주목한다. '새로운 클론이군. 기업과 맞설 준비가 됐나?'",
-      "choices": [
-        {
-          "text": "해킹 스킬을 배운다 (+해킹)",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": -200,
-          "nextEventId": "skill_up_hack",
-          "itemGains": [],
-          "informationGains": [ [ "해킹기술", 1 ] ],
-          "requiredItems": []
-        }
-      ]
-    },
-    {
-      "id": "weapon_shop",
-      "description": "음침한 뒷골목의 무기상. 사이보그 팔을 가진 상인이 당신을 맞는다. '복수할 거라면 제대로 된 무기가 필요하지.'",
-      "choices": [
-        {
-          "text": "근접 무기를 산다 (+무력)",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": -150,
-          "nextEventId": "skill_up_str",
-          "itemGains": [ [ "사이버칼", 1 ] ],
-          "informationGains": [],
-          "requiredItems": []
-        }
-      ]
-    },
-    {
-      "id": "clone_revival",
-      "description": "의식이 새로운 클론 바디로 전송되었다. 당신은 안전가옥에서 깨어난다. 복수는 계속되어야 한다.",
-      "choices": [
-        {
-          "text": "다시 시작한다",
-          "reqStrength": 0,
-          "reqHacking": 0,
-          "hpDelta": 0,
-          "sanityDelta": 0,
-          "moneyDelta": 0,
-          "nextEventId": "street_explore",
-          "itemGains": [],
-          "informationGains": [],
-          "requiredItems": []
-        }
-      ]
-    },
-    {
-      "id": "complete_death",
-      "description": "마지막 클론 바디마저 파괴되었다. 당신의 복수는 여기서 끝난다...",
-      "choices": []
     }
   ]
 }

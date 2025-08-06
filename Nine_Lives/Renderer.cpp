@@ -91,7 +91,7 @@ static void drawChoiceBlock(int index, const string& text, bool locked, bool hig
         break;
 
     case 1: { // LEFT (맞춤 계산)
-        arrow = "[LEFT]  ";
+        arrow = "[LEFT] ";
         baseY = CARD_POS_Y + CARD_HEIGHT / 2;
         int textWidth = getDisplayWidth(wrapped[0]);
         baseX = (CARD_POS_X - 2) - ((int)arrow.size() + textWidth);
@@ -99,15 +99,15 @@ static void drawChoiceBlock(int index, const string& text, bool locked, bool hig
     }
 
     case 2: // UP
-        arrow = "[UP]    ";
+        arrow = "[UP] ";
         baseY = CARD_POS_Y - 2;
-        baseX = cardCenterX - (int)arrow.size() / 2;
+        baseX = cardCenterX - (int)arrow.size() / 2 -12;
         break;
 
     case 3: // DOWN
-        arrow = "[DOWN]  ";
+        arrow = "[DOWN] ";
         baseY = cardBottomY + 2;
-        baseX = cardCenterX - (int)arrow.size() / 2;
+        baseX = cardCenterX - (int)arrow.size() / 2 -12;
         break;
     }
 
