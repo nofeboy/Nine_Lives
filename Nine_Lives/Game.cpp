@@ -12,6 +12,24 @@
 
 using namespace std;
 
+// ✅ 선택지 잠금 체크 함수 추가 (Renderer에서도 사용)
+bool Game::isChoiceLocked(const Choice& choice, const Player& player) {
+	// 스탯 요구사항 체크
+	if (player.strength < choice.reqStrength || player.hacking < choice.reqHacking) {
+		return true;
+	}
+
+	// 필수 아이템 체크
+	for (const string& reqItem : choice.requiredItems) {
+		auto it = player.items.find(reqItem);
+		if (it == player.items.end() || it->second <= 0) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void Game::run() {
 	srand((unsigned int)time(NULL));
 
@@ -33,7 +51,8 @@ void Game::run() {
 		forceNextEventId = startEvents.front();
 	}
 	else if (!eventManager.randomPool.empty()) {
-		forceNextEventId = eventManager.randomPool.front();
+		int idx = rand() % eventManager.randomPool.size();
+		forceNextEventId = eventManager.randomPool[idx];
 	}
 	else {
 		throw std::runtime_error("[FATAL] No start or random events available!");
@@ -53,15 +72,38 @@ void Game::run() {
 
 		auto& ev = eventManager.getEvent(currentEventId);
 
+		
+
+		if (currentEventId == "gameover_screen") {
+			Renderer::showGameOver();
+
+			// ✅ 클론 부활 로직 개선
+			if (player.cloneBodies > 0) {
+				player.useCloneBody(); // 클론 사용 및 아이템 드랍 처리
+
+				//// 드랍된 아이템이 있으면 알림
+				//if (!player.lastDroppedItem.empty()) {
+				//	Renderer::showItemDrop(player.lastDroppedItem);
+				//}
+
+				Renderer::showCloneRevival();
+				currentEventId = "revive_story";
+			}
+			else {
+				currentEventId = "death_final";
+			}
+			continue;
+		}
+
 		if (ev.choices.empty()) {
-			Renderer::renderEventFull(ev, player, animateCard);
+			Renderer::renderEventFull(ev, player, animateCard, turnCount);
 			if (player.isCompletelyDead()) Renderer::showCompleteGameOver();
 			else Renderer::showGameOver();
 			break;
 		}
 
 		if (!previewMode) {
-			Renderer::renderEventFull(ev, player, animateCard);
+			Renderer::renderEventFull(ev, player, animateCard, turnCount);
 			animateCard = false;
 		}
 		else {
@@ -85,13 +127,8 @@ void Game::run() {
 		else if (previewMode && dir == lastDir) {
 			if (idx == -1) continue;
 
-			bool locked = (player.strength < ev.choices[idx].reqStrength || player.hacking < ev.choices[idx].reqHacking);
-			for (const string& reqItem : ev.choices[idx].requiredItems) {
-				if (player.items.find(reqItem) == player.items.end() || player.items.at(reqItem) <= 0) {
-					locked = true;
-					break;
-				}
-			}
+			// ✅ 잠금 체크를 함수로 통일
+			bool locked = isChoiceLocked(ev.choices[idx], player);
 
 			if (locked) {
 				Renderer::showLockedWarning();
@@ -117,27 +154,59 @@ void Game::processChoice(int choiceIndex) {
 	auto& ev = eventManager.getEvent(currentEventId);
 	auto& choice = ev.choices[choiceIndex];
 
-	// ✅ 선택 기록 추가
-	playerHistory.insert(ev.id + ":" + choice.text);
+	std::string choiceKey = ev.id + ":" + choice.text;
+	playerHistory.insert(choiceKey);
+	choiceTurnHistory[choiceKey].push_back(turnCount);
 
-	// ✅ 턴 증가
-	turnCount++;
+	if (!turnStarted && currentEventId == "intro_23") {
+		turnStarted = true;
+		turnCount = 0;
+	}
+	if (turnStarted) {
+		turnCount++;
+	}
 
-	// ✅ 기존 HP, sanity, money 변경 로직 유지
+	// ===== outcomes 분기 및 델타 적용 =====
+	bool matched = false;
+	if (!choice.outcomes.empty()) {
+		for (const auto& outcome : choice.outcomes) {
+			bool allMet = true;
+			for (const auto& cond : outcome.conditions) {
+				if (!isConditionMet(cond, player, turnCount)) {
+					allMet = false;
+					break;
+				}
+			}
+			if (allMet) {
+				// ✅ outcome의 델타 적용
+				player.money += outcome.moneyDelta;
+				player.hp += outcome.hpDelta;
+				player.sanity += outcome.sanityDelta;
+				player.strength += outcome.strengthDelta;
+				player.hacking += outcome.hackingDelta;
+				player.cloneBodies += outcome.cloneDelta;
+
+				for (const auto& item : outcome.itemChanges) {
+					player.addItem(item.first, item.second);
+				}
+				for (const auto& info : outcome.infoChanges) {
+					player.addInformation(info.first, info.second);
+				}
+
+				player.applyStatLimits();
+				currentEventId = outcome.nextEventId;
+				return;
+			}
+		}
+	}
+
+	// ✅ 조건 만족한 outcome 없으면 choice의 델타 적용
+	player.money += choice.moneyDelta;
 	player.hp += choice.hpDelta;
 	player.sanity += choice.sanityDelta;
-	player.money += choice.moneyDelta;
 	player.strength += choice.strengthDelta;
 	player.hacking += choice.hackingDelta;
-
-	if (player.hp > 7) player.hp = 7;
-	if (player.hp < 0) player.hp = 0;
-	if (player.sanity > 7) player.sanity = 7;
-	if (player.sanity < 0) player.sanity = 0;
-	if (player.strength > 7) player.strength = 7;
-	if (player.hacking > 7) player.hacking = 7;
-	if (player.money < 0) player.money = 0;
-
+	player.cloneBodies += choice.cloneDelta;
 
 	for (const auto& item : choice.itemGains) {
 		player.addItem(item.first, item.second);
@@ -145,6 +214,8 @@ void Game::processChoice(int choiceIndex) {
 	for (const auto& info : choice.informationGains) {
 		player.addInformation(info.first, info.second);
 	}
+
+	player.applyStatLimits();
 
 	if (choice.nextEventId == "random") {
 		currentEventId = "";
@@ -161,21 +232,26 @@ std::string Game::getNextEventId() {
 		return id;
 	}
 
+	// ✅ 강제 이벤트 체크 (우선순위별로 정렬)
+	std::vector<std::pair<std::string, Event*>> candidateForced;
 	for (auto& item : eventManager.events) {
 		auto& ev = item.second;
 		if (ev.type == "forced" && checkEventCondition(ev)) {
-			// 모든 선택지가 단 하나라도 기록됐으면 무조건 넘어감
-			bool alreadySeen = false;
-			for (auto& ch : ev.choices) {
-				if (playerHistory.count(ev.id + ":" + ch.text)) {
-					alreadySeen = true;
-					break;
-				}
-			}
-			// **여기서** 이미 본 이벤트면 continue, 안 본 이벤트만 리턴
-			if (alreadySeen) continue;
-			return item.first;
+			candidateForced.push_back({ item.first, &ev });
 		}
+	}
+
+	// ✅ 강제 이벤트가 있다면 우선순위에 따라 선택
+	if (!candidateForced.empty()) {
+		// death 관련 이벤트 우선
+		for (auto& candidate : candidateForced) {
+			if (candidate.first.find("death") != std::string::npos ||
+				candidate.first.find("clone") != std::string::npos) {
+				return candidate.first;
+			}
+		}
+		// 그 외는 첫 번째
+		return candidateForced[0].first;
 	}
 
 	// ✅ 랜덤 이벤트 기존 로직
@@ -204,23 +280,101 @@ std::string Game::getNextEventId() {
 	return chosen;
 }
 
-
+// ✅ 완전히 재작성된 checkEventCondition 함수
 bool Game::checkEventCondition(const Event& ev) {
-	if (ev.condition.minTurns > 0 && turnCount < ev.condition.minTurns) return false;
 
-	for (const auto& item : ev.condition.stats) {
-		const std::string& stat = item.first;
-		int minVal = item.second.min;
-		if (stat == "strength" && player.strength < minVal) return false;
-		if (stat == "hacking" && player.hacking < minVal) return false;
-		if (stat == "hp" && player.hp < minVal) return false;
-		if (stat == "sanity" && player.sanity < minVal) return false;
-		if (stat == "money" && player.money < minVal) return false;
+	for (const auto& blocked : ev.condition.excludedIfChoiceMade) {
+		if (playerHistory.count(blocked)) return false;
 	}
 
-	for (auto& choiceKey : ev.condition.requiredChoices) {
-		if (playerHistory.find(choiceKey) == playerHistory.end()) return false;
+	// 턴 수 체크
+	if (ev.condition.minTurns > 0 && turnCount < ev.condition.minTurns) {
+		return false;
+	}
+
+
+	// 스탯 조건 체크
+	for (const auto& item : ev.condition.stats) {
+		const std::string& statName = item.first;
+		const StatCondition& statCond = item.second;
+
+		int playerValue = getPlayerStat(player, statName);
+
+		// min/max 체크
+		if (playerValue < statCond.min || playerValue > statCond.max) {
+			return false;
+		}
+	}
+
+	// 필요한 선택지 기록 체크
+	for (const auto& choiceKey : ev.condition.requiredChoices) {
+		if (playerHistory.find(choiceKey) == playerHistory.end()) {
+			return false;
+		}
 	}
 
 	return true;
+}
+
+// ✅ 플레이어 스탯 가져오기 함수 개선
+int Game::getPlayerStat(const Player& player, const std::string& statName) {
+	if (statName == "strength") return player.strength;
+	if (statName == "hacking") return player.hacking;
+	if (statName == "hp") return player.hp;
+	if (statName == "sanity") return player.sanity;
+	if (statName == "money") return player.money;
+	if (statName == "clones") return player.cloneBodies;  // ✅ 추가
+	return 0;
+}
+
+// ✅ outcomes 조건 체크 함수 개선
+bool Game::isConditionMet(const Condition& cond, const Player& player, int turnCount) {
+	// 스탯 조건
+	if (!cond.stat.empty()) {
+		// ✅ "random" 스탯은 확률로 처리
+		if (cond.stat == "random") {
+			int randomValue = rand() % 100 + 1; // 1~100
+			return randomValue <= cond.min; // min 값이 확률(%)
+		}
+		return getPlayerStat(player, cond.stat) >= cond.min;
+	}
+
+	// 아이템 조건
+	if (!cond.item.empty()) {
+		auto it = player.items.find(cond.item);
+		if (it == player.items.end()) return false;
+		return it->second >= cond.min;
+	}
+
+	// 정보 조건
+	if (!cond.info.empty()) {
+		auto it = player.information.find(cond.info);
+		if (it == player.information.end()) return false;
+		return it->second >= cond.min;
+	}
+
+	// 후속 선택지 조건
+	if (!cond.afterChoice.empty() && cond.turnsPassed > 0) {
+		auto it = choiceTurnHistory.find(cond.afterChoice);
+		if (it == choiceTurnHistory.end()) return false;
+
+		bool met = false;
+		for (int choiceTurn : it->second) {
+			if (turnCount - choiceTurn >= cond.turnsPassed) {
+				met = true;
+				break;
+			}
+		}
+		if (!met) return false;
+	}
+
+
+	// 턴 조건
+	if (cond.hasTurn) {
+		return turnCount >= cond.turnValue;
+	}
+
+
+
+	return false;
 }

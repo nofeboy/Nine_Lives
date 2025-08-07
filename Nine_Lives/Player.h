@@ -4,12 +4,12 @@
 #include <vector>
 
 struct Player {
-    int strength = 0;
-    int hacking = 0;
+    int strength = 3;
+    int hacking = 3;
     int hp = 7;
     int sanity = 7;
-    int money = 3;
-    int cloneBodies = 9;  // 클론 바디 개수
+    int money = 7;
+    int cloneBodies = 0;  // 시작 시 클론 바디 개수
 
     // 아이템 (물건 - 사망시 소실)
     std::map<std::string, int> items;
@@ -29,4 +29,8 @@ struct Player {
 
     // 클론 바디 소모 및 리셋
     void useCloneBody();
+    void resetToDefault();
+
+    void applyStatLimits();
+
 };
