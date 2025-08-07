@@ -7,7 +7,7 @@
 class Renderer {
 public:
     // ✅ 전체 이벤트 화면 렌더링 (HUD + 카드 + 선택지 + 아이템)
-    static void renderEventFull(const Event& ev, const Player& player, bool animateCard);
+    static void renderEventFull(const Event& ev, const Player& player, bool animateCard, int turnCount);
 
     // ✅ 선택지 강조만 갱신 (예비 선택 시)
     static void updateChoicesOnly(const Event& ev, const Player& player, Direction previewDir);
@@ -16,7 +16,7 @@ public:
     static void eraseCardText(const std::string& text);
 
     // ✅ HUD + 아이템 출력
-    static void drawHUD(const Player& player);
+    static void drawHUD(const Player& player, int turnCount);
     static void drawItems(const Player& player);
 
     //선택지 출력
@@ -27,8 +27,8 @@ public:
     static void showGameOver();
     static void showCompleteGameOver();
     static void showCloneRevival();
-    static void showItemDrop(const std::string& itemName);
-
+    //static void showItemDrop(const std::string& itemName);
+    static void showReviveAnimation();
 };
 
 // ✅ 내부 카드 출력용 (cpp 전용에서 정의)

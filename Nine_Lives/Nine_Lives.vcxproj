@@ -139,6 +139,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="events.json" />
+    <None Include="nine_lives_story.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleUtils.h" />

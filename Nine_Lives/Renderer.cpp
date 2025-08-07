@@ -1,5 +1,6 @@
 ﻿#include "Renderer.h"
 #include "ConsoleUtils.h"
+#include "Game.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -30,7 +31,6 @@ const int CARD_POS_Y = 8;
 static void sleep_ms(int ms) {
     this_thread::sleep_for(chrono::milliseconds(ms));
 }
-
 
 // ✅ 문자열 실제 출력 폭 계산 (한글 대응)
 int getDisplayWidth(const string& text) {
@@ -79,7 +79,7 @@ vector<string> wrapChoiceText(const string& text, int maxWidth) {
 //선택지 출력
 static void drawChoiceBlock(int index, const string& text, bool locked, bool highlight,
     int cardCenterX, int cardBottomY, int leftX, int rightX) {
-    auto wrapped = wrapChoiceText(text, 30);
+    auto wrapped = wrapChoiceText(text, 32);
     string arrow;
     int baseY, baseX;
 
@@ -95,19 +95,22 @@ static void drawChoiceBlock(int index, const string& text, bool locked, bool hig
         baseY = CARD_POS_Y + CARD_HEIGHT / 2;
         int textWidth = getDisplayWidth(wrapped[0]);
         baseX = (CARD_POS_X - 2) - ((int)arrow.size() + textWidth);
+
+        // 👉 왼쪽 경계 침범 방지
+        if (baseX < 2) baseX = 2;
         break;
     }
 
     case 2: // UP
         arrow = "[UP] ";
-        baseY = CARD_POS_Y - 2;
-        baseX = cardCenterX - (int)arrow.size() / 2 -12;
+        baseY = CARD_POS_Y - 3;
+        baseX = cardCenterX - (int)arrow.size() / 2 - 16;
         break;
 
     case 3: // DOWN
         arrow = "[DOWN] ";
-        baseY = cardBottomY + 2;
-        baseX = cardCenterX - (int)arrow.size() / 2 -12;
+        baseY = cardBottomY + 3;
+        baseX = cardCenterX - (int)arrow.size() / 2 - 16;
         break;
     }
 
@@ -128,8 +131,6 @@ static void drawChoiceBlock(int index, const string& text, bool locked, bool hig
             << "H" << GRAY << "[LOCKED]" << RESET;
     }
 }
-
-
 
 // ✅ 카드 내부 줄바꿈 처리 + \n 대응
 vector<string> wrapText(const string& text) {
@@ -287,9 +288,9 @@ void Renderer::eraseCardText(const string&) {
 }
 
 // ✅ 화면 전체 렌더 (HUD + 카드 + 선택지 + 아이템)
-void Renderer::renderEventFull(const Event& ev, const Player& player, bool animateCard) {
+void Renderer::renderEventFull(const Event& ev, const Player& player, bool animateCard, int turnCount) {
     ConsoleUtils::clearScreen();
-    drawHUD(player);
+    drawHUD(player, turnCount);
 
     if (animateCard) {
         drawCardAnimated(ev.description); // 카드 애니메이션 끝나고
@@ -316,7 +317,7 @@ void Renderer::updateChoicesOnly(const Event& ev, const Player& player, Directio
     int rightX = CARD_POS_X + CARD_WIDTH + 4;
 
     for (size_t i = 0; i < ev.choices.size(); i++) {
-        bool locked = (player.strength < ev.choices[i].reqStrength || player.hacking < ev.choices[i].reqHacking);
+        bool locked = Game::isChoiceLocked(ev.choices[i], player); // ✅ Game:: 사용
         bool highlight = (previewDir == RIGHT && i == 0) || (previewDir == LEFT && i == 1) ||
             (previewDir == UP && i == 2) || (previewDir == DOWN && i == 3);
         drawChoiceBlock((int)i, ev.choices[i].text, locked, highlight, cardCenterX, cardBottomY, leftX, rightX);
@@ -324,22 +325,26 @@ void Renderer::updateChoicesOnly(const Event& ev, const Player& player, Directio
     cout.flush();
 }
 
-
 // ✅ HUD
-void Renderer::drawHUD(const Player& player) {
-    cout << CYAN << BOLD << "[ STATS ]" << RESET
+void Renderer::drawHUD(const Player& player, int turnCount) {
+    cout << "\n" << CYAN << BOLD << "[ STATS ]" << RESET
         << " HP: " << player.hp
         << " | SAN: " << player.sanity
         << " | STR: " << player.strength
         << " | HACK: " << player.hacking
-        << " | $" << player.money
+        << " | money: " << player.money 
         << " | " << GREEN << "CLONES: " << player.cloneBodies << "/9" << RESET << "\n";
+    if (turnCount > 0) {
+        cout << " | " << YELLOW << "TURN: " << turnCount << RESET;
+    }
+    cout << "\n";
 }
 
 // ✅ 아이템 표시
 void Renderer::drawItems(const Player& player) {
-    cout << MAGENTA << "ITEMS: " << RESET;
-    if (player.items.empty() && player.information.empty()) {
+    // 아이템 라인
+    cout << MAGENTA << "ITEM: " << RESET;
+    if (player.items.empty()) {
         cout << u8"(없음)";
     }
     else {
@@ -348,13 +353,19 @@ void Renderer::drawItems(const Player& player) {
             if (it.second > 1) cout << "*" << it.second;
             cout << "  ";
         }
-        if (!player.information.empty()) {
-            cout << CYAN << "INFO: " << RESET;
-            for (auto& info : player.information) {
-                cout << info.first;
-                if (info.second > 1) cout << "*" << info.second;
-                cout << "  ";
-            }
+    }
+    cout << "\n\n";
+
+    // 정보 라인
+    cout << CYAN << "INFO: " << RESET;
+    if (player.information.empty()) {
+        cout << u8"(없음)";
+    }
+    else {
+        for (auto& info : player.information) {
+            cout << info.first;
+            if (info.second > 1) cout << "*" << info.second;
+            cout << "  ";
         }
     }
     cout << "\n";
@@ -362,7 +373,7 @@ void Renderer::drawItems(const Player& player) {
 
 // ✅ 경고
 void Renderer::showLockedWarning() {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 2; i++) {
         cout << "\n" << RED << u8"선택 조건 부족" << RESET << flush;
         sleep_ms(200);
         cout << "\r" << string(30, ' ') << "\r" << flush;
@@ -421,11 +432,6 @@ void Renderer::showCompleteGameOver() {
     cin.get();
 }
 
-void Renderer::showItemDrop(const std::string& itemName) {
-    cout << "\n" << YELLOW << u8"아이템 [" << itemName << u8"]을(를) 떨어뜨렸습니다..." << RESET << "\n";
-    this_thread::sleep_for(chrono::milliseconds(1500));
-}
-
 void Renderer::renderChoices(const Event& ev, const Player& player, Direction) {
     int cardCenterX = CARD_POS_X + CARD_WIDTH / 2;
     int cardBottomY = CARD_POS_Y + CARD_HEIGHT;
@@ -433,8 +439,25 @@ void Renderer::renderChoices(const Event& ev, const Player& player, Direction) {
     int rightX = CARD_POS_X + CARD_WIDTH + 4;
 
     for (size_t i = 0; i < ev.choices.size(); i++) {
-        bool locked = (player.strength < ev.choices[i].reqStrength || player.hacking < ev.choices[i].reqHacking);
+        bool locked = Game::isChoiceLocked(ev.choices[i], player); // ✅ Game:: 사용
         drawChoiceBlock((int)i, ev.choices[i].text, locked, false, cardCenterX, cardBottomY, leftX, rightX);
     }
     cout.flush();
+}
+
+void Renderer::showReviveAnimation() {
+    ConsoleUtils::clearScreen();
+    std::string ascii =
+        "\n\n   ████  █    █ ██████  ██████\n"
+        "   █     █    █ █    █  █    █\n"
+        "   ████  █    █ ██████  █    █\n"
+        "   █     █    █ █   █   █    █\n"
+        "   █     ██████ █    █  ██████\n"
+        "\n[클론 바디 재부팅 중...]\n";
+    for (char c : ascii) {
+        std::cout << c << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1200)); // 잠시 정지
+    ConsoleUtils::clearScreen();
 }
