@@ -6,12 +6,8 @@
       "description": "2088년, 네오-인천광역시.\n거대기업이 마수를 뻗친 이 마계도시에서 당신은 꽤나 성공한 편이었다.\n대기업 '쌍용'의 정직원으로서, 멀끔한 양복과 사이버 택시, 그리고 최신형 총기를 만끽하고 있으니까.\n길거리의 쥐새끼들과는 다른 인생이다. 그놈들은 해봤자 낡아빠진 거적데기에, 불법 총기나 들고 다니겠지.\n\n그래, 불법 총기......\n당신을 겨누고 있는 저 총 같은 것 말이다.",
       "choices": [
         {
-          "text": "지금 무슨 일인지 살펴본다.",
+          "text": "이게 무슨 일이지?",
           "nextEventId": "intro_2"
-        },
-        {
-          "text": "인트로 스킵",
-          "nextEventId": "random"
         }
       ]
     },
@@ -88,7 +84,7 @@
     {
       "id": "intro_6",
       "type": "story",
-      "description": "\"하하, 이제는 서 팀장이라고 불러주시죠.  아무튼... 그동안 감사했습니다, 선배님.\"\n\n서 대리는 당신의 이마에 총구를 들이밀었다.",
+      "description": "\"하하, 다 선배님한테 배운거죠.  아무튼... 그동안 감사했습니다, 선배님.\"\n\n서 대리는 당신의 이마에 총구를 들이밀었다.",
       "choices": [
         {
           "text": "아무것도 할 수가 없다.",
@@ -99,7 +95,7 @@
     {
       "id": "intro_7",
       "type": "story",
-      "description": "굉음과 함께 무언가 번쩍하더니-\n......\n......\n......\n의식이 흐려진다.",
+      "description": "굉음과 함께 무언가 번쩍하더니-\n.\n.\n.\n.\n.\n.\n의식이 흐려진다.",
       "choices": [
         {
           "text": "......",
@@ -252,9 +248,9 @@
         {
           "text": "원래 몸에서 옷을 꺼내 입는다.",
           "cloneDelta": 9,
-          "hpDelta": 2,
-          "sanityDelta": 2,
-          "moneyDelta": 1,
+          "hpDelta": 3,
+          "sanityDelta": 3,
+          "moneyDelta": 2,
           "nextEventId": "intro_22"
         }
       ]
@@ -333,7 +329,7 @@
           "nextEventId": "r_1_gangster_2_Nmoney"
         },
         {
-          "text": "거래를 제안한다.",
+          "text": "[오가닉-담배] 거래를 제안한다.",
           "requiredItems": [ "오가닉-담배" ],
           "moneyDelta": 3,
           "nextEventId": "r_1_gangster_3"
@@ -395,6 +391,7 @@
         }
       ]
     },
+
 
 
     {
@@ -484,7 +481,7 @@
     {
       "id": "r_2_discshop_3",
       "type": "story",
-      "description": "(돈 -1) (SAN +1)\n\"......그렇게 예승이는 범죄자들을 사냥하는 도시의 수호자가 되었다.\"\n\n역시 고전영화는 감동적이라니까.",
+      "description": "(돈 -1) (SAN +1)\n\"......그렇게 예승이는 범죄자들을 단죄하는 도시의 수호자가 되었다.\"\n\n역시 고전영화는 감동적이라니까.",
       "choices": [
         {
           "text": "계속...",
@@ -493,7 +490,7 @@
       ]
     },
     {
-      "id": "r_2_discshop_nMoney",
+      "id": "r_2_discshop_Nmoney",
       "type": "story",
       "description": "디스크 상인이 어이없어한다. \"돈도 없으면서 무슨, 외상 안 받아. 꺼져!\"",
       "choices": [
@@ -531,7 +528,7 @@
           "nextEventId": "r_3_vending_Nmoney"
         },
         {
-          "text": "자판기 아래를 발로 쓸며 뒤져본다.",
+          "text": "자판기 아래를 발로 뒤져본다.",
           "outcomes": [
             {
               "conditions": [
@@ -585,6 +582,8 @@
                   "min": 1
                 }
               ],
+              "moneyDelta": -1,
+              "hpDelta": 1,
               "nextEventId": "r_3_vending_1"
             }
           ],
@@ -612,412 +611,606 @@
 
 
     {
-      "id": "r_4_robbery1",
+      "id": "r_4_standoff",
       "type": "random",
-      "description": "길을 걷던 당신에게 한 남자가 다가온다. \"이봐, 잠깐 아르바이트 한번 어때. 저기 총포상을 털 건데, \"",
-      "condition": {
-        "excludedIfChoiceMade": [ "r_4_partjob:무시한다." ]
-      },
+      "description": "평소처럼 인천 길거리를 걷던 와중...\n\n\"그냥 죽어 이 개새끼야!!\"\n\n저 멀리서 총성과 함께 여자의 외침 소리가 들린다. 어떡할까?",
       "choices": [
         {
-          "text": "위협한다.",
+          "text": "무슨 일인지 가서 살펴본다.",
+          "nextEventId": "r_4_standoff_1"
+        },
+        {
+          "text": "인천에선 흔한 일이다. 무시하고 가던 길을 간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1",
+      "type": "story",
+      "description": "총성이 들리는 쪽으로 가보니, 한 여자가 당장이라도 울 것만 같은 얼굴로 돌담 너머에 있는 남자에게 총을 쏘고 있다.  남자는 겨우 몸을 숨기고 있는 듯하다",
+      "choices": [
+        {
+          "text": "여자에게 말을 건다.",
+          "nextEventId": "r_4_standoff_1_1"
+        },
+        {
+          "text": "여자를 제압한다.",
           "outcomes": [
             {
               "conditions": [
                 {
-                  "stat": "strength",
+                  "stat": "sterngth",
                   "min": 2
                 }
               ],
-              "nextEventId": "r_1_gangster_1_win"
+              "moneyDelta": 1,
+              "nextEventId": "r_4_standoff_1_2Y"
             }
           ],
-          "nextEventId": "r_1_gangster_1_lose"
+          "hpDelta": -2,
+          "nextEventId": "r_4_standoff_1_2N"
         },
         {
-          "text": "통행료를 낸다.",
+          "text": "[권총] 여자를 도와 남자에게 총을 쏜다.",
+          "requiredItems": [ "권총" ],
+          "nextEventId": "r_4_standoff_1_3"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1",
+      "type": "story",
+      "description": "\"진정? 지금 진정하게 생겼어? 저 개새끼가 바람을 폈는데?\"\n여자가 울먹이며 답했다. 어쩌면 너무 복잡한 문제에 끼어든 건지도 모르겠다...",
+      "choices": [
+        {
+          "text": "여자를 응원하고 떠난다.",
+          "nextEventId": "r_4_standoff_1_1_1"
+        },
+        {
+          "text": "그래도 살인은 아니라며 여자를 일갈한다.",
           "outcomes": [
             {
               "conditions": [
                 {
-                  "stat": "money",
-                  "min": 1
-                }
-              ],
-              "nextEventId": "r_1_gangster_2_Ymoney"
-            }
-          ],
-          "nextEventId": "r_1_gangster_2_Nmoney"
-        },
-        {
-          "text": "거래를 제안한다.",
-          "requiredItems": [ "오가닉-담배" ],
-          "nextEventId": "r_1_gangster_3"
-        }
-      ]
-    },
-
-
-    {
-      "id": "r_999_secret_meeting",
-      "type": "random_once",
-      "description": "어두운 골목 끝, 가면을 쓴 자가 당신을 기다리고 있다. \"계약할 시간이다...\"",
-      "choices": [
-        {
-          "text": "가면의 제안을 받아들인다.",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "money",
-                  "min": 2
-                }
-              ],
-              "moneyDelta": -2,
-              "sanityDelta": -1,
-              "hackingDelta": 2,
-              "nextEventId": "random"
-            }
-          ],
-          "sanityDelta": -1,
-          "nextEventId": "random"
-        },
-        {
-          "text": "무시하고 자리를 뜬다.",
-          "nextEventId": "random"
-        }
-      ]
-    },
-
-
-
-    {
-      "id": "event_1",
-      "type": "random",
-      "description": "문이 굳게 잠겨 있다.",
-      "choices": [
-        {
-          "text": "힘으로 밀어 연다",
-          "reqStrength": 3,
-          "requiredItems": [ "열쇠" ],
-          "nextEventId": "random"
-        },
-        {
-          "text": "그냥 돌아간다",
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "neon_cross",
-      "type": "random",
-      "description": "네온십자 거리, 두 갈래의 빛.",
-      "choices": [
-        {
-          "text": "왼쪽 골목(싸움)",
-          "nextEventId": "gang_fight"
-        },
-        {
-          "text": "오른쪽 골목(상점)",
-          "nextEventId": "shop_event"
-        }
-      ]
-    },
-    {
-      "id": "gang_fight",
-      "type": "story",
-      "description": "사이버갱단과 마주친다.",
-      "choices": [
-        {
-          "text": "근력으로 밀어붙인다.",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "strength",
-                  "min": 3
-                }
-              ],
-              "nextEventId": "str_win"
-            }
-          ],
-          "strengthDelta": 1,
-          "nextEventId": "str_lose"
-        }
-      ]
-    },
-    {
-      "id": "str_win",
-      "type": "story",
-      "description": "갱단을 제압! 근력 +1.",
-      "choices": [
-        {
-          "text": "계속...",
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "str_lose",
-      "type": "story",
-      "description": "밀렸고, 상처를 입었다.",
-      "choices": [
-        {
-          "text": "계속...",
-          "hpDelta": -7,
-          "nextEventId": "random"
-        }
-      ]
-    },
-
-    {
-      "id": "shop_event",
-      "type": "random",
-      "description": "길거리 상점. 다양한 상품.",
-      "choices": [
-        {
-          "text": "치료제 구매(체력+2)",
-          "moneyDelta": -2,
-          "hpDelta": 2,
-          "nextEventId": "shop_result_hp"
-        },
-        {
-          "text": "사이버칩 구매",
-          "moneyDelta": -1,
-          "itemGains": [ [ "사이버칩", 1 ] ],
-          "nextEventId": "shop_result_chip"
-        },
-        {
-          "text": "그냥 나간다.",
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "shop_result_hp",
-      "type": "story",
-      "description": "치료제로 체력 +2!",
-      "choices": [
-        {
-          "text": "계속...",
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "shop_result_chip",
-      "type": "story",
-      "description": "사이버칩 획득.",
-      "choices": [
-        {
-          "text": "계속...",
-          "nextEventId": "random"
-        }
-      ]
-    },
-
-    {
-      "id": "market_info",
-      "type": "random",
-      "description": "암시장 상인, 정보를 속삭인다.",
-      "choices": [
-        {
-          "text": "돈을 주고 듣는다.",
-          "moneyDelta": -2,
-          "informationGains": [ [ "암시장 코드", 1 ] ],
-          "nextEventId": "info_result"
-        },
-        {
-          "text": "무시한다.",
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "info_result",
-      "type": "story",
-      "description": "암시장 정보를 얻었다.",
-      "choices": [
-        {
-          "text": "계속...",
-          "nextEventId": "random"
-        }
-      ]
-    },
-
-    {
-      "id": "tunnel_hack",
-      "type": "random",
-      "description": "어두운 터널, 보안 터미널 발견.",
-      "choices": [
-        {
-          "text": "해킹툴로 해킹(확률)",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "hacking",
-                  "min": 3
-                }
-              ],
-              "nextEventId": "hack_high_chance"
-            }
-          ],
-          "nextEventId": "hack_low_chance"
-        }
-      ]
-    },
-    {
-      "id": "hack_high_chance",
-      "type": "story",
-      "description": "해킹력이 충분하다! (70% 성공)",
-      "choices": [
-        {
-          "text": "침투 시도",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "random",
-                  "min": 70
-                }
-              ],
-              "nextEventId": "hack_success"
-            }
-          ],
-          "nextEventId": "hack_fail"
-        }
-      ]
-    },
-    {
-      "id": "hack_low_chance",
-      "type": "story",
-      "description": "해킹력이 부족하다... (30% 성공)",
-      "choices": [
-        {
-          "text": "무모하게 시도",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "random",
-                  "min": 30
-                }
-              ],
-              "nextEventId": "hack_success"
-            }
-          ],
-          "nextEventId": "hack_fail"
-        }
-      ]
-    },
-    {
-      "id": "hack_success",
-      "type": "story",
-      "description": "해킹 성공! 큰 돈과 정보를 얻었다.",
-      "choices": [
-        {
-          "text": "계속...",
-          "moneyDelta": 4,
-          "informationGains": [ [ "보안 데이터", 1 ] ],
-          "nextEventId": "random"
-        }
-      ]
-    },
-    {
-      "id": "hack_fail",
-      "type": "story",
-      "description": "해킹 실패, 보안봇 공격!",
-      "choices": [
-        {
-          "text": "계속...",
-          "hpDelta": -3,
-          "nextEventId": "random"
-        }
-      ]
-    },
-
-
-
-    {
-      "id": "final_boss_forced",
-      "type": "random",
-      "description": "보스룸 앞! 입장 조건이 모두 충족되어야 자동 진입.",
-      "condition": {
-        "stats": {
-          "strength": { "min": 8 },
-          "hacking": { "min": 3 }
-        }
-      },
-      "choices": [
-        {
-          "text": "정면 승부한다!",
-          "outcomes": [
-            {
-              "conditions": [
-                {
-                  "stat": "strength",
-                  "min": 7
-                },
-                {
-                  "stat": "hacking",
+                  "stat": "sanity",
                   "min": 5
-                },
-                {
-                  "info": "보안 데이터",
-                  "min": 1
                 }
               ],
-              "nextEventId": "true_ending"
+              "itemGains": [ [ "소형 수류탄 키링", 1 ] ],
+              "nextEventId": "r_4_standoff_1_1_2Y"
             }
           ],
-          "nextEventId": "bad_ending"
+          "hpDelta": -1,
+          "nextEventId": "r_4_standoff_1_1_2N"
         },
         {
-          "text": "하지 않는다.",
+          "text": "[권총] 여자를 도와 남자를 총으로 쏜다.",
+          "requiredItems": [ "권총" ],
+          "nextEventId": "r_4_standoff_1_3"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1_1",
+      "type": "story",
+      "description": "당신은 총성을 뒤로 하고 떠났다.",
+      "choices": [
+        {
+          "text": "역시 사랑은 전쟁이라니깐...",
           "nextEventId": "random"
         }
       ]
     },
     {
-      "id": "true_ending",
+      "id": "r_4_standoff_1_1_2Y",
       "type": "story",
-      "description": "완벽한 준비로 최종보스를 쓰러뜨렸다! [진엔딩]",
-      "choices": []
-    },
-    {
-      "id": "bad_ending",
-      "type": "story",
-      "description": "준비가 부족해 패배했다... [배드엔딩]",
-      "choices": []
-    },
-    {
-      "id": "clone_revive",
-      "type": "forced",
-      "description": "클론 바디가 활성화된다! 새로운 삶을 시작.",
-      "condition": {
-        "stats": {
-          "hp": { "max": 0 },
-          "clones": { "min": 1 }
+      "description": "(아이템 '소형 수류탄 키링' 획득)\n당신은 뛰어난 인간성을 바탕으로 여자를 다그쳤다. 총질 대신 대화를 하기로 한 그녀가 당신에게 고맙다며 선물을 줬다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
         }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1_2N",
+      "type": "story",
+      "description": "(HP -1)\n당신의 일갈은 꼰대처럼 보였나보다...\n\n\"네가 뭘 안다고 지랄이야? 꺼져!\"\n\n화난 여자는 당신에게도 총을 갈기기 시작했다. 당신은 당황해서 도망치다가 어깨에 총을 맞았다. 아프다...",
+      "choices": [
+        {
+          "text": "아야...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_2Y",
+      "type": "story",
+      "description": "(돈 +1)\n당신이 재빠르게 여자를 제압하자 돌담 뒤에 숨어있던 남자가 나와 말했다.\n\n\"아, 형씨. 고마워. 하하, 여자친구가 약간... 오해가 있던 것 같더라고...! 아무튼 덕분에 살았어!\"\n\n당신은 약간의 보상금을 받고 길을 떠났다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_2N",
+      "type": "story",
+      "description": "(HP -2)\n속도가 부족해서 제압에 실패한 당신은 오히려 그녀에게 총알을 잔뜩 맞았다. 겨우 도망치는 당신의 뒤에서, 한 남자의 비명 소리가 들려온다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_3",
+      "type": "story",
+      "description": "당신이 달려가서 남자의 머리를 총으로 쏘자, 여자가 당신에게 화를 낸다.\n\n\"꺄아아아악! 뭐하는거야! 너 지금... 민호를...!!\"",
+      "choices": [
+        {
+          "text": "그냥 도와준 건데 왜 화를...?",
+          "nextEventId": "r_4_standoff_1_3_1"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_3_1",
+      "type": "story",
+      "description": "\"아니... 나는... 진짜 죽이려는 건 아니었지... 민호야......\"\n\n여자는 죽은 남자를 끌어안고 울기 시작했다. 머쓱해진 당신은 조용히 자리를 떠났다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+    {
+      "id": "r_5_drugman",
+      "type": "random",
+      "description": "굴다리 아래를 지나던 중, 전자 마약에 중독된 평범한 시민이 보인다. 흰자를 까뒤집고 있는 모습을 보니, 누가 주머니에서 돈을 슬쩍해도 모를 것 같다.",
+      "choices": [
+        {
+          "text": "다가가서 돈을 훔친다.",
+          "moneyDelta": 1,
+          "sanityDelta": -1,
+          "nextEventId": "r_5_drugman_1"
+        },
+        {
+          "text": "관심 없다. 조용히 길을 지나간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_5_drugman_1",
+      "type": "story",
+      "description": "(돈 +1 SAN -1)\n당신은 은밀하게 지폐 몇 장을 꺼냈다. 양심이 좀 찔리지만 어쩌겠나. 이게 네오-인천이다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+    {
+      "id": "r_6_kid",
+      "type": "random",
+      "description": "길을 걷던 당신의 발에 축구공이 닿는다.\n\n\"저기요, 공 좀 차주세요!\"\n\n빈민가 꼬마가 펜스 너머에서 소리친다.",
+      "choices": [
+        {
+          "text": "펜스 너머로 멋있게 공을 넘긴다.",
+          "sanityDelta": 2,
+          "nextEventId": "r_6_kid_1"
+        },
+        {
+          "text": "공을 꼬마 반대편으로 뻥 차버린다.",
+          "sanityDelta": 1,
+          "nextEventId": "r_6_kid_2"
+        },
+        {
+          "text": "무시하고 가던 길을 간다.",
+          "nextEventId": "r_6_kid_3"
+        }
+      ]
+    },
+    {
+      "id": "r_6_kid_1",
+      "type": "story",
+      "description": "(SAN +2)\n당신이 공을 넘겨주자 꼬마가 방긋 웃으며 고맙다고 말한다. 아직 네오-인천에도 순수함이 살아있다니. 당신은 인간성이 회복되는 것을 느낀다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_6_kid_2",
+      "type": "story",
+      "description": "(SAN +1)\n당신은 힘껏 축구공을 저 멀리로 날려버렸다. 넋이 나간 꼬마의 표정이 꽤나 웃기다. 하하!\n당신은 오랜만에 웃으며 인간성을 조금 회복(?)했다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_6_kid_3",
+      "type": "story",
+      "description": "당신이 그냥 길을 가자 꼬마가 가운데 손가락을 날린다. 당신도 꼬마에게 중지를 치켜세웠다. 네오-인천의 흔한 인사법이다. (아님)",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+    {
+      "id": "r_7_raid",
+      "type": "random_once",
+      "description": "뒷골목을 걷던 중, 파란 검은 피부의 남자가 말을 건다. \n\n\"이봐, 당신 꽤 배짱 있어보이는군. 지금 편의점을 털려고 하는데 함께하겠어? 수익은 5:5로 나누지.\"",
+      "choices": [
+        {
+          "text": "내가 할 일은 뭐지?",
+          "nextEventId": "r_7_raid_1"
+        },
+        {
+          "text": "무시하고 가던 길을 간다.",
+          "nextEventId": "r_7_raid_2"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raid_2",
+      "type": "story",
+      "description": "\"흥, 쫄보 자식. 됐어, 다른 놈하고 같이 해야겠군.\"\n\n남자는 툴툴거리며 저 멀리 사라졌다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raid_1",
+      "type": "story",
+      "description": "\"Easy! 너가 손님인 척 들어가있다가, 내가 들어가면 알바 옆에서 fuckin 겁먹은 척을 해. 그러다 알바가 반항하려고 하면 fuck! 하고 제압하면 돼.\"",
+      "choices": [
+        {
+          "text": "간단한데! 바로 가자.",
+          "nextEventId": "r_7_raid_1_1"
+        },
+        {
+          "text": "수상한데... 됐어. 난 빠질래.",
+          "nextEventId": "r_7_raid_2"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raid_1_1",
+      "type": "story",
+      "description": "\"일단 통성명부터 할까. 난 흑길동이라고 한다. 너는?\"",
+      "choices": [
+        {
+          "text": "이름을 말해준다.",
+          "nextEventId": "r_7_raid_1_2"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raid_1_2",
+      "type": "story",
+      "description": "\"좋았어. 그럼 바로 가보자고! 잘 부탁한다, 파트너.\"",
+      "choices": [
+        {
+          "text": "작전대로 편의점에 들어간다.",
+          "nextEventId": "r_7_raiding"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding",
+      "type": "story",
+      "description": "당신은 평범한 시민처럼 편의점에 들어갔다. 각종 바이오-간식, 소형 총기, 각종 배터리를 파는 평범한 편의점이다.",
+      "choices": [
+        {
+          "text": "조용히 쇼핑을 하며 기다린다.",
+          "nextEventId": "r_7_raiding_1"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_1",
+      "type": "story",
+      "description": "\"Stop! 이마에 빵꾸나기 싫으면 다 fuckin 손들어!\"\n\n흑길동이 우렁차게 문을 박차고선 편의점으로 들어왔다. 손에는 권총 두 자루를 쥐고.",
+      "choices": [
+        {
+          "text": "손을 든다.",
+          "nextEventId": "r_7_raiding_2"
+        },
+        {
+          "text": "흑길동을 공격한다.",
+          "hpDelta": -7,
+          "nextEventId": "r_7_raiding_1N"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_1N",
+      "type": "story",
+      "description": "(HP -7)\n\"이, 이 fuckin 배신자!\"\n\n흑길동은 순식간에 당신을 벌집으로 만들었다. 역시 배신은 잘못된 선택이었다.",
+      "choices": [
+        {
+          "text": "",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2",
+      "type": "story",
+      "description": "당신과 아르바이트생은 손을 든 채 구석으로 몰렸다. 흑길동은 각종 물건과 현금을 가방에 담기 시작했다. 그때 아르바이트생이 조용히 이빨을 딱딱거리는 소리가 들렸다.",
+      "choices": [
+        {
+          "text": "많이 불안한가보다. 냅두자.",
+          "hpDelta": -6,
+          "nextEventId": "r_7_raiding_2_1"
+        },
+        {
+          "text": "아르바이트생을 제압한다.",
+          "nextEventId": "r_7_raiding_2_2"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2_1",
+      "type": "story",
+      "description": "(HP -6)\n흑길동이 가방을 다 채우려던 그때, 어느새 경찰 드론 3대가 편의점 앞으로 날아왔다. 드론의 총격에 흑길동과 당신, 그리고 아르바이트생은 모두 사망했다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2_2",
+      "type": "story",
+      "description": "느낌상 저건 경찰 호출 경보다! 당신은 녀석의 입에 손을 넣어 턱을 비틀었다. 아르바이트생의 비명을 들은 흑길동이 침울한 표정으로 말한다.\n\n\"미안하군. 그렇게까지 하고 싶진 않았는데...\"",
+      "choices": [
+        {
+          "text": "나갈 준비는 다 된거야?",
+          "nextEventId": "r_7_raiding_2_3"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2_3",
+      "type": "story",
+      "description": "\"그래, 이제 떠나자고!\"\n\n흑길동과 당신은 재빨리 편의점을 벗어났다. 얼마나 달렸을까, 어느덧 인적 드문 뒷골목이었다.\n\n\"자, 이제 전리품을 나눠보자고.\"",
+      "choices": [
+        {
+          "text": "야호!",
+          "moneyDelta": 2,
+          "itemGains": [ [ "권총", 1 ] ],
+          "nextEventId": "r_7_raiding_2_4"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2_4",
+      "type": "story",
+      "description": "(돈 +1, 아이템 '권총' 획득)\n\"생각보다 돈이 별로 없었어... 이게 절반 분량이다. 수고했다, 파트너. 하나 있던 권총은 선물로 주지.\"",
+      "choices": [
+        {
+          "text": "인사를 마치고 길을 떠난다.",
+          "nextEventId": "random"
+        },
+        {
+          "text": "[권총] 길동의 머리를 쏜다.",
+          "requiredItems": [ "권총" ],
+          "moneyDelta": 3,
+          "sanityDelta": -2,
+          "itemGains": [ [ "바이오-담배", 1 ] ],
+          "nextEventId": "r_7_raiding_2_5"
+        }
+      ]
+    },
+    {
+      "id": "r_7_raiding_2_5",
+      "type": "story",
+      "description": "-탕!\n\n길동의 머리에 큰 구멍이 생겼다. 네오-인천에서 사람들 이렇게 쉽게 믿다니, 이건 다 녀석의 잘못이다.\n\n......그렇지?\n\n(돈 +3, 아이템 '바이오-삼각김밥' 획득, SAN -2)",
+      "choices": [
+        {
+          "text": "...계속",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "id": "main_1_correspondent",
+      "type": "forced",
+      "description": "서 대리의 행적을 쫓던 당신은, 우선 그 가방의 정체부터 알아야겠다고 생각했다. 당신은 그 날 방문했던 거래처 건물로 이동했다. 거대한 사옥 건물 앞은 경비가 삼엄하다.",
+      "condition": {
+        "minScenarios": 6,
+        "excludedIfInfoOwned": [ "가방의 정체1" ]
       },
       "choices": [
         {
-          "text": "부활!",
-          "hpDelta": 7,
-          "sanityDelta": 3,
-          "cloneDelta": -5,
-          "nextEventId": "revive_story"
+          "text": "[STR 6] 단신으로 경비를 뚫고 들어간다.",
+          "reqStrength": 6,
+          "nextEventId": "main_1_correspondent_1"
+        },
+        {
+          "text": "[HACK 6] 사옥 보안 프로그램을 해킹한다.",
+          "reqHacking": 6,
+          "nextEventId": "main_1_correspondent_1"
+        },
+        {
+          "text": "방문객으로 위장해서 들어간다.",
+          "nextEventId": "main_1_correspondent_3"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_1",
+      "type": "story",
+      "description": "-추후 스토리 추가 예정-",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_3",
+      "type": "story",
+      "description": "직장인이었던 당신은 다행히 적절한 핑계를 대고 사옥 안에 들어갈 수 있었다. 이제 그 가방의 단서를 어디서 찾지...",
+      "choices": [
+        {
+          "text": "개발연구팀으로 간다.",
+          "nextEventId": "main_1_correspondent_cut1"
+        },
+        {
+          "text": "사장실로 간다.",
+          "nextEventId": "main_1_correspondent_cut1"
+        },
+        {
+          "text": "화장실로 간다.",
+          "nextEventId": "main_1_correspondent_cut1s"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_cut1",
+      "type": "story",
+      "description": "엘레베이터로 걸어가던 당신의 귀에 서 대리의 목소리가 들린다. 돌아보니 그가 누군가와 함께 사옥 내부를 걷고 있다.",
+      "choices": [
+        {
+          "text": "조용히 서 대리의 뒤를 따라간다.",
+          "nextEventId": "main_1_correspondent_follow"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_cut1s",
+      "type": "story",
+      "description": "우선 급한 일부터 해결하려던 당신은 화장실에서 나오는 서 대리를 마주쳤다. 서 대리는 화장실 앞에서 그를 기다리던 누군가와 함께 반대편으로 걸어간다.",
+      "choices": [
+        {
+          "text": "일단 서 대리의 뒤를 따라간다.",
+          "nextEventId": "main_1_correspondent_follow"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow",
+      "type": "story",
+      "description": "\"'그 가방'은 잘 회수했습니다. 문제는......\"\n\n서 대리가 같이 걷고 있던 연구복을 입은 여자에게 말했다. 여자는 따로 대답하지 않았다.",
+      "choices": [
+        {
+          "text": "자연스럽게 더 가까이 붙어 걷는다.",
+          "nextEventId": "main_1_correspondent_follow2"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow2",
+      "type": "story",
+      "description": "\"도저히 열 수가 없던데요. 어중간한 해킹 툴도 먹히지 않고, 이거 대체 보안을 얼마나 걸어놓은 겁니까?\"\n\n그제서야 여자가 작게 대답했다.\n\n\"그만. 자세한 건 올라가서 얘기하죠.\"",
+      "choices": [
+        {
+          "text": "끝까지 따라가서 얘기를 마저 들어본다.",
+          "informationGains": [ [ "가방의 정체1", 1 ] ],
+          "nextEventId": "main_1_correspondent_follow2_1"
+        },
+        {
+          "text": "더 이상은 따라가기 힘들다. 빠져나온다.",
+          "informationGains": [ [ "가방의 정체1", 1 ] ],
+          "nextEventId": "main_1_correspondent_follow2_2"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow2_1",
+      "type": "story",
+      "description": "(정보 '가방의 정체1' 획득)\n너무 무리하게 서 대리 근처로 다가간 당신은 그만 경비에게 쫓겨났다. 일단은 이 정도 정보로 만족해야겠다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow2_2",
+      "type": "story",
+      "description": "(정보 '가방의 정체1' 획득)\n당신은 조심스럽게 건물을 빠져나왔다. 일단은 이 정도 정보로 만족해야겠다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+
+
+
+
+
+    {
+      "id": "death_notice",
+      "type": "story",
+      "description": "HP 또는 SAN이 바닥났다.\n의식이 흐려진다...",
+      "choices": [
+        {
+          "text": "......",
+          "cloneDelta": -1,
+          "nextEventId": "__TRIGGER_REVIVAL__"
         }
       ]
     },
     {
       "id": "revive_story",
       "type": "story",
-      "description": "클론 바디에서 깨어났다. 다시 시작이다.",
+      "description": "낯선 천장이다. 지하실의 클론 바디에서 깨어났다.\n\n아직 복수는 끝나지 않았다.",
       "choices": [
         {
-          "text": "계속...",
+          "text": "다시 지상으로...",
           "nextEventId": "random"
         }
       ]
@@ -1025,7 +1218,7 @@
     {
       "id": "death_final",
       "type": "forced",
-      "description": "클론 바디도 모두 소진. 모든 것이 끝났다.",
+      "description": "클론 바디를 모두 소진한 채 죽었다. 모든 것이 끝났다.",
       "condition": {
         "stats": {
           "hp": { "max": 0 },
@@ -1038,12 +1231,6 @@
           "nextEventId": "true_gameover"
         }
       ]
-    },
-    {
-      "id": "true_gameover",
-      "type": "story",
-      "description": "모든 빛과 기억이 사라진다. [THE END]",
-      "choices": []
     }
   ]
 }
