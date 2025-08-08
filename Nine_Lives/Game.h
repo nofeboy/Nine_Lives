@@ -25,6 +25,7 @@ private:
 
     bool turnStarted = false;
     int turnCount = 0;  // ✅ 추가
+    int scenarioCount = 0;
     std::unordered_set<std::string> playerHistory; // ✅ 선택 기록 저장
 
     int getPlayerStat(const Player& player, const std::string& statName);

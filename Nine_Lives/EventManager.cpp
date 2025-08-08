@@ -16,7 +16,7 @@ void EventManager::loadEvents(const std::string& filename) {
 
     for (auto& e : data["events"]) {
         Event ev;
-        ev.type = e.value("type", "random");   // ⭐⭐⭐ 이 줄을 꼭 추가! ⭐⭐⭐
+        ev.type = e.value("type", "random");
 
         ev.id = e["id"];
         ev.description = e["description"];
@@ -24,7 +24,7 @@ void EventManager::loadEvents(const std::string& filename) {
         if (e.contains("condition")) {
             auto cond = e["condition"];
             ev.condition.minTurns = cond.value("minTurns", 0);
-            // ⭐⭐⭐ 꼭 이 if문을 넣어! ⭐⭐⭐
+            ev.condition.minScenarios = cond.value("minScenarios", 0);
             if (cond.contains("stats") && !cond["stats"].is_null()) {
                 for (auto& item : cond["stats"].items()) {
                     StatCondition sc;
@@ -51,9 +51,9 @@ void EventManager::loadEvents(const std::string& filename) {
         }
 
         std::string type = e.value("type", "random");
-        if (type == "random") {
-            randomPool.push_back(ev.id);
-        }
+            if (type == "random" || type == "random_once") {
+                randomPool.push_back(ev.id);
+            }
         else if (type == "forced") {
             std::string trigger = e.value("trigger", "");
             if (!trigger.empty()) {
@@ -85,6 +85,11 @@ void EventManager::loadEvents(const std::string& filename) {
                             if (cond.contains("excludedIfChoiceMade")) {
                                 for (auto& ex : cond["excludedIfChoiceMade"]) {
                                     cd.excludedIfChoiceMade.push_back(ex);
+                                }
+                            }
+                            if (cond.contains("excludedIfInfoOwned")) {
+                                for (auto& info : cond["excludedIfInfoOwned"]) {
+                                    ev.condition.excludedIfInfoOwned.push_back(info);
                                 }
                             }
 
@@ -177,7 +182,7 @@ void EventManager::loadEvents(const std::string& filename) {
 }
 
 Event& EventManager::getEvent(const std::string& id) {
-    if (id == "random") {
+    if (id == "random" || id == "random_once") {
         throw std::runtime_error("[FATAL] Attempted to fetch 'random' as event ID. Logic error!");
     }
     auto it = events.find(id);
@@ -188,6 +193,6 @@ Event& EventManager::getEvent(const std::string& id) {
 }
 
 std::vector<std::string> EventManager::getForcedEvents(const std::string& trigger) {
-    if (forcedEvents.count(trigger)) return forcedEvents[trigger];
+    if (EventManager::forcedEvents.count(trigger)) return forcedEvents[trigger];
     return {};
 }

@@ -288,9 +288,9 @@ void Renderer::eraseCardText(const string&) {
 }
 
 // ✅ 화면 전체 렌더 (HUD + 카드 + 선택지 + 아이템)
-void Renderer::renderEventFull(const Event& ev, const Player& player, bool animateCard, int turnCount) {
+void Renderer::renderEventFull(const Event& ev, const Player& player, bool animateCard, int turnCount, int scenarioCount) {
     ConsoleUtils::clearScreen();
-    drawHUD(player, turnCount);
+    drawHUD(player, turnCount, scenarioCount);
 
     if (animateCard) {
         drawCardAnimated(ev.description); // 카드 애니메이션 끝나고
@@ -326,7 +326,7 @@ void Renderer::updateChoicesOnly(const Event& ev, const Player& player, Directio
 }
 
 // ✅ HUD
-void Renderer::drawHUD(const Player& player, int turnCount) {
+void Renderer::drawHUD(const Player& player, int turnCount, int scenarioCount) {
     cout << "\n" << CYAN << BOLD << "[ STATS ]" << RESET
         << " HP: " << player.hp
         << " | SAN: " << player.sanity
@@ -336,6 +336,9 @@ void Renderer::drawHUD(const Player& player, int turnCount) {
         << " | " << GREEN << "CLONES: " << player.cloneBodies << "/9" << RESET << "\n";
     if (turnCount > 0) {
         cout << " | " << YELLOW << "TURN: " << turnCount << RESET;
+    }
+    if (scenarioCount > 0) {
+        cout << " | " << YELLOW << "SN: " << scenarioCount << RESET;
     }
     cout << "\n";
 }

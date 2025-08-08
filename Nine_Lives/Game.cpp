@@ -96,14 +96,14 @@ void Game::run() {
 		}
 
 		if (ev.choices.empty()) {
-			Renderer::renderEventFull(ev, player, animateCard, turnCount);
+			Renderer::renderEventFull(ev, player, animateCard, turnCount, scenarioCount);
 			if (player.isCompletelyDead()) Renderer::showCompleteGameOver();
 			else Renderer::showGameOver();
 			break;
 		}
 
 		if (!previewMode) {
-			Renderer::renderEventFull(ev, player, animateCard, turnCount);
+			Renderer::renderEventFull(ev, player, animateCard, turnCount, scenarioCount);
 			animateCard = false;
 		}
 		else {
@@ -153,9 +153,18 @@ void Game::run() {
 void Game::processChoice(int choiceIndex) {
 	auto& ev = eventManager.getEvent(currentEventId);
 	auto& choice = ev.choices[choiceIndex];
+	bool goingRandom = false;
 
 	std::string choiceKey = ev.id + ":" + choice.text;
 	playerHistory.insert(choiceKey);
+	playerHistory.insert(ev.id);
+
+	if (ev.type == "random_once") {
+		// 여러 번 있을 수 있으니 싹 다 제거
+		auto& pool = eventManager.randomPool;
+		pool.erase(std::remove(pool.begin(), pool.end(), ev.id), pool.end());
+	}
+
 	choiceTurnHistory[choiceKey].push_back(turnCount);
 
 	if (!turnStarted && currentEventId == "intro_23") {
@@ -194,7 +203,15 @@ void Game::processChoice(int choiceIndex) {
 				}
 
 				player.applyStatLimits();
-				currentEventId = outcome.nextEventId;
+
+				// ✅ random 처리 추가
+				if (outcome.nextEventId == "random" || outcome.nextEventId == "random_once") {
+					currentEventId = getNextEventId(); 
+					goingRandom = true;
+				}
+				else {
+					currentEventId = outcome.nextEventId;
+				}
 				return;
 			}
 		}
@@ -217,11 +234,18 @@ void Game::processChoice(int choiceIndex) {
 
 	player.applyStatLimits();
 
-	if (choice.nextEventId == "random") {
-		currentEventId = "";
+	if (choice.nextEventId == "random" || choice.nextEventId == "random_once") {
+		currentEventId = getNextEventId();
+		goingRandom = true;
 	}
 	else {
 		currentEventId = choice.nextEventId;
+	}
+
+
+	if (goingRandom) {
+		scenarioCount++;
+		//std::cout << "[DEBUG] 시나리오 종료! 현재 카운트: " << scenarioCount << std::endl;
 	}
 }
 
@@ -261,6 +285,9 @@ std::string Game::getNextEventId() {
 
 	std::vector<std::string> candidates;
 	for (auto& id : eventManager.randomPool) {
+		const auto& ev = eventManager.getEvent(id);
+
+		// ✅ 최근 이벤트 중복 방지
 		if (std::find(recentEvents.begin(), recentEvents.end(), id) == recentEvents.end()) {
 			candidates.push_back(id);
 		}
@@ -280,18 +307,28 @@ std::string Game::getNextEventId() {
 	return chosen;
 }
 
-// ✅ 완전히 재작성된 checkEventCondition 함수
+
 bool Game::checkEventCondition(const Event& ev) {
 
 	for (const auto& blocked : ev.condition.excludedIfChoiceMade) {
 		if (playerHistory.count(blocked)) return false;
 	}
 
+	for (const auto& blockedInfo : ev.condition.excludedIfInfoOwned) {
+		auto it = player.information.find(blockedInfo);
+		if (it != player.information.end() && it->second > 0) {
+			return false; // 이 정보를 가지고 있으면 등장 X
+		}
+	}
+
 	// 턴 수 체크
 	if (ev.condition.minTurns > 0 && turnCount < ev.condition.minTurns) {
 		return false;
 	}
-
+	// 시나리오 수 체크
+	if (ev.condition.minScenarios > 0 && scenarioCount < ev.condition.minScenarios) {
+		return false;
+	}
 
 	// 스탯 조건 체크
 	for (const auto& item : ev.condition.stats) {

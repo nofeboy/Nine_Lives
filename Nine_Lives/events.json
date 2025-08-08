@@ -657,6 +657,40 @@
       ]
     },
 
+
+    {
+      "id": "r_999_secret_meeting",
+      "type": "random_once",
+      "description": "어두운 골목 끝, 가면을 쓴 자가 당신을 기다리고 있다. \"계약할 시간이다...\"",
+      "choices": [
+        {
+          "text": "가면의 제안을 받아들인다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "money",
+                  "min": 2
+                }
+              ],
+              "moneyDelta": -2,
+              "sanityDelta": -1,
+              "hackingDelta": 2,
+              "nextEventId": "random"
+            }
+          ],
+          "sanityDelta": -1,
+          "nextEventId": "random"
+        },
+        {
+          "text": "무시하고 자리를 뜬다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
     {
       "id": "event_1",
       "type": "random",

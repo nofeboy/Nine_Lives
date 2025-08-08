@@ -88,7 +88,7 @@
     {
       "id": "intro_6",
       "type": "story",
-      "description": "\"하하, 이제는 서 팀장이라고 불러주시죠.  아무튼... 그동안 감사했습니다, 선배님.\"\n\n서 대리는 당신의 이마에 총구를 들이밀었다.",
+      "description": "\"하하, 다 선배님한테 배운거죠.  아무튼... 그동안 감사했습니다, 선배님.\"\n\n서 대리는 당신의 이마에 총구를 들이밀었다.",
       "choices": [
         {
           "text": "아무것도 할 수가 없다.",
@@ -333,7 +333,7 @@
           "nextEventId": "r_1_gangster_2_Nmoney"
         },
         {
-          "text": "거래를 제안한다.",
+          "text": "[오가닉-담배] 거래를 제안한다.",
           "requiredItems": [ "오가닉-담배" ],
           "moneyDelta": 3,
           "nextEventId": "r_1_gangster_3"
@@ -395,6 +395,7 @@
         }
       ]
     },
+
 
 
     {
@@ -484,7 +485,7 @@
     {
       "id": "r_2_discshop_3",
       "type": "story",
-      "description": "(돈 -1) (SAN +1)\n\"......그렇게 예승이는 범죄자들을 사냥하는 도시의 수호자가 되었다.\"\n\n역시 고전영화는 감동적이라니까.",
+      "description": "(돈 -1) (SAN +1)\n\"......그렇게 예승이는 범죄자들을 단죄하는 도시의 수호자가 되었다.\"\n\n역시 고전영화는 감동적이라니까.",
       "choices": [
         {
           "text": "계속...",
@@ -612,51 +613,298 @@
 
 
     {
-      "id": "r_4_robbery1",
-      "type": "random",
-      "description": "길을 걷던 당신에게 한 남자가 다가온다. \"이봐, 잠깐 아르바이트 한번 어때. 저기 총포상을 털 건데, \"",
-      "condition": {
-        "excludedIfChoiceMade": [ "r_4_partjob:무시한다." ]
-      },
+      "id": "r_4_standoff",
+      "type": "random_once",
+      "description": "평소처럼 인천 길거리를 걷던 와중...\n\n\"그냥 죽어 이 개새끼야!!\"\n\n저 멀리서 총성과 함께 여자의 외침 소리가 들린다. 어떡할까?",
       "choices": [
         {
-          "text": "위협한다.",
+          "text": "무슨 일인지 가서 살펴본다.",
+          "nextEventId": "r_4_standoff_1"
+        },
+        {
+          "text": "인천에선 흔한 일이다. 무시하고 가던 길을 간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1",
+      "type": "story",
+      "description": "총성이 들리는 쪽으로 가보니, 한 여자가 당장이라도 울 것만 같은 얼굴로 돌담 너머에 있는 남자에게 총을 쏘고 있다.  남자는 겨우 몸을 숨기고 있는 듯하다",
+      "choices": [
+        {
+          "text": "여자에게 말을 건다.",
+          "nextEventId": "r_4_standoff_1_1"
+        },
+        {
+          "text": "여자를 제압한다.",
           "outcomes": [
             {
               "conditions": [
                 {
-                  "stat": "strength",
+                  "stat": "sterngth",
                   "min": 2
                 }
               ],
-              "nextEventId": "r_1_gangster_1_win"
+              "moneyDelta": 1,
+              "nextEventId": "r_4_standoff_1_2Y"
             }
           ],
-          "nextEventId": "r_1_gangster_1_lose"
+          "hpDelta": -2,
+          "nextEventId": "r_4_standoff_1_2N"
         },
         {
-          "text": "통행료를 낸다.",
+          "text": "[권총] 여자를 도와 남자에게 총을 쏜다.",
+          "requiredItems": [ "권총" ],
+          "nextEventId": "r_4_standoff_1_3"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1",
+      "type": "story",
+      "description": "\"진정? 지금 진정하게 생겼어? 저 개새끼가 바람을 폈는데?\"\n여자가 울먹이며 답했다. 어쩌면 너무 복잡한 문제에 끼어든 건지도 모르겠다...",
+      "choices": [
+        {
+          "text": "여자를 응원하고 떠난다.",
+          "nextEventId": "r_4_standoff_1_1_1"
+        },
+        {
+          "text": "그래도 살인은 아니라며 여자를 일갈한다.",
           "outcomes": [
             {
               "conditions": [
                 {
-                  "stat": "money",
-                  "min": 1
+                  "stat": "sanity",
+                  "min": 5
                 }
               ],
-              "nextEventId": "r_1_gangster_2_Ymoney"
+              "itemGains": [ [ "소형 수류탄 키링", 1 ] ],
+              "nextEventId": "r_4_standoff_1_1_2Y"
             }
           ],
-          "nextEventId": "r_1_gangster_2_Nmoney"
+          "hpDelta": -1,
+          "nextEventId": "r_4_standoff_1_1_2N"
         },
         {
-          "text": "거래를 제안한다.",
-          "requiredItems": [ "오가닉-담배" ],
-          "nextEventId": "r_1_gangster_3"
+          "text": "[권총] 여자를 도와 남자를 총으로 쏜다.",
+          "requiredItems": [ "권총" ],
+          "nextEventId": "r_4_standoff_1_3"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1_1",
+      "type": "story",
+      "description": "당신은 총성을 뒤로 하고 떠났다.",
+      "choices": [
+        {
+          "text": "역시 사랑은 전쟁이라니깐...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1_2Y",
+      "type": "story",
+      "description": "(아이템 '소형 수류탄 키링' 획득)\n당신은 뛰어난 인간성을 바탕으로 여자를 다그쳤다. 총질 대신 대화를 하기로 한 그녀가 당신에게 고맙다며 선물을 줬다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_1_2N",
+      "type": "story",
+      "description": "(HP -1)\n당신의 일갈은 꼰대처럼 보였나보다...\n\n\"네가 뭘 안다고 지랄이야? 꺼져!\"\n\n화난 여자는 당신에게도 총을 갈기기 시작했다. 당신은 당황해서 도망치다가 어깨에 총을 맞았다. 아프다...",
+      "choices": [
+        {
+          "text": "아야...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_2Y",
+      "type": "story",
+      "description": "(돈 +1)\n당신이 재빠르게 여자를 제압하자 돌담 뒤에 숨어있던 남자가 나와 말했다.\n\n\"아, 형씨. 고마워. 하하, 여자친구가 약간... 오해가 있던 것 같더라고...! 아무튼 덕분에 살았어!\"\n\n당신은 약간의 보상금을 받고 길을 떠났다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_2N",
+      "type": "story",
+      "description": "(HP -2)\n속도가 부족해서 제압에 실패한 당신은 오히려 그녀에게 총알을 잔뜩 맞았다. 겨우 도망치는 당신의 뒤에서, 한 남자의 비명 소리가 들려온다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_3",
+      "type": "story",
+      "description": "당신이 달려가서 남자의 머리를 총으로 쏘자, 여자가 당신에게 화를 낸다.\n\n\"꺄아아아악! 뭐하는거야! 너 지금... 민호를...!!\"",
+      "choices": [
+        {
+          "text": "그냥 도와준 건데 왜 화를...?",
+          "nextEventId": "r_4_standoff_1_3_1"
+        }
+      ]
+    },
+    {
+      "id": "r_4_standoff_1_3_1",
+      "type": "story",
+      "description": "\"아니... 나는... 진짜 죽이려는 건 아니었지... 민호야......\"\n\n여자는 죽은 남자를 끌어안고 울기 시작했다. 머쓱해진 당신은 조용히 자리를 떠났다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "r_4_standoff_1_3_1"
+        }
+      ]
+    },
+
+
+
+
+    {
+      "id": "r_5_raid",
+      "type": "random",
+      "description": "뒷골목 암시장이다. ",
+      "choices": [
+        {
+          "text": "무슨 일인지 가서 살펴본다.",
+          "nextEventId": "r_4_standoff_1"
+        },
+        {
+          "text": "인천에선 흔한 일이다. 무시하고 가던 길을 간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "id": "main_1_correspondent",
+      "type": "",
+      "description": "서 대리의 행적을 쫓던 당신은, 우선 그 가방의 정체부터 알아야겠다고 생각했다. 당신은 그 날 방문했던 거래처 건물로 이동했다. 거대한 사옥 건물 앞은 경비가 삼엄하다.",
+      "condition": {
+        "minScenarios": 3,
+        "excludedIfInfoOwned": [ "가방의 정체1" ]
+      },
+      "choices": [
+        {
+          "text": "[STR 6] 단신으로 경비를 뚫고 들어간다.",
+          "reqStrength": 6,
+          "nextEventId": "main_1_correspondent_1"
+        },
+        {
+          "text": "[HACK 6] 사옥 보안 프로그램을 해킹한다.",
+          "reqHacking": 6,
+          "nextEventId": "main_1_correspondent_1"
+        },
+        {
+          "text": "방문객으로 위장해서 들어간다.",
+          "nextEventId": "main_1_correspondent_3"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_1",
+      "type": "story",
+      "description": "-추후 스토리 추가 예정-",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_3",
+      "type": "story",
+      "description": "직장인이었던 당신은 다행히 적절한 핑계를 대고 사옥 안에 들어갈 수 있었다. 이제 그 가방의 단서를 어디서 찾지...",
+      "choices": [
+        {
+          "text": "개발연구팀으로 간다.",
+          "nextEventId": "main_1_correspondent_cut1"
+        },
+        {
+          "text": "사장실로 간다.",
+          "nextEventId": "main_1_correspondent_cut1"
+        },
+        {
+          "text": "화장실로 간다.",
+          "nextEventId": "main_1_correspondent_cut1s"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_cut1",
+      "type": "story",
+      "description": "엘레베이터로 걸어가던 당신의 귀에 서 대리의 목소리가 들린다. 돌아보니 그가 누군가와 함께 사옥 내부를 걷고 있다.",
+      "choices": [
+        {
+          "text": "조용히 서 대리의 뒤를 따라간다.",
+          "nextEventId": "main_1_correspondent_follow"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_cut1s",
+      "type": "story",
+      "description": "우선 급한 일부터 해결하려던 당신은 화장실에서 나오는 서 대리를 마주쳤다. 서 대리는 화장실 앞에서 그를 기다리던 누군가와 함께 반대편으로 걸어간다.",
+      "choices": [
+        {
+          "text": "일단 서 대리의 뒤를 따라간다.",
+          "nextEventId": "main_1_correspondent_follow"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow",
+      "type": "story",
+      "description": "\"'그 가방'은 잘 회수했습니다. 문제는......\"\n\n서 대리가 같이 걷고 있던 연구복을 입은 여자에게 말했다. 여자는 따로 대답하지 않았다.",
+      "choices": [
+        {
+          "text": "자연스럽게 더 가까이 붙어 걷는다.",
+          "nextEventId": "main_1_correspondent_follow2"
+        }
+      ]
+    },
+    {
+      "id": "main_1_correspondent_follow2",
+      "type": "story",
+      "description": "\"도저히 열 수가 없던데요. 어중간한 해킹 툴도 먹히지 않고, 이거 대체 보안을 얼마나 걸어놓은 겁니까? \"\n\n연구복을 입은 여자는 ",
+      "choices": [
+        {
+          "text": "자연스럽게 더 가까이 붙어 걷는다.",
+          "nextEventId": "main_1_correspondent_follow2"
         }
       ]
     }
-    
 
   ]
 }
