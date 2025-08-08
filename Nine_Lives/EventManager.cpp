@@ -17,7 +17,6 @@ void EventManager::loadEvents(const std::string& filename) {
     for (auto& e : data["events"]) {
         Event ev;
         ev.type = e.value("type", "random");
-
         ev.id = e["id"];
         ev.description = e["description"];
 
@@ -36,29 +35,30 @@ void EventManager::loadEvents(const std::string& filename) {
                     }
                     else if (item.value().is_number_integer()) {
                         sc.min = item.value().get<int>();
-                        // max는 INT_MAX 그대로
                     }
                     ev.condition.stats[item.key()] = sc;
                 }
             }
-
 
             if (cond.contains("choicesMade")) {
                 for (auto& ch : cond["choicesMade"]) {
                     ev.condition.requiredChoices.push_back(ch);
                 }
             }
+            // ★★★★★ 여기는 ev.condition이 맞습니다. (이벤트 자체의 조건) ★★★★★
+            if (cond.contains("excludedIfInfoOwned")) {
+                for (auto& info : cond["excludedIfInfoOwned"]) {
+                    ev.condition.excludedIfInfoOwned.push_back(info);
+                }
+            }
         }
 
         std::string type = e.value("type", "random");
-            if (type == "random" || type == "random_once") {
-                randomPool.push_back(ev.id);
-            }
+        if (type == "random" || type == "random_once") {
+            randomPool.push_back(ev.id);
+        }
         else if (type == "forced") {
-            std::string trigger = e.value("trigger", "");
-            if (!trigger.empty()) {
-                forcedEvents[trigger].push_back(ev.id);
-            }
+            // "forced" 타입 이벤트는 별도로 처리하지 않아도 getNextEventId에서 전체를 순회합니다.
         }
 
         for (auto& c : e["choices"]) {
@@ -74,7 +74,6 @@ void EventManager::loadEvents(const std::string& filename) {
             ch.hackingDelta = c.value("hackingDelta", 0);
             ch.cloneDelta = c.value("cloneDelta", 0);
 
-            // outcomes 파싱 추가
             if (c.contains("outcomes")) {
                 for (auto& o : c["outcomes"]) {
                     Outcome out;
@@ -82,14 +81,17 @@ void EventManager::loadEvents(const std::string& filename) {
                         for (auto& cond : o["conditions"]) {
                             Condition cd;
 
+                            // ... (다른 조건 파싱) ...
                             if (cond.contains("excludedIfChoiceMade")) {
                                 for (auto& ex : cond["excludedIfChoiceMade"]) {
                                     cd.excludedIfChoiceMade.push_back(ex);
                                 }
                             }
+
+                            // ★★★★★ 여기가 수정된 부분입니다. (outcome 내부의 조건) ★★★★★
                             if (cond.contains("excludedIfInfoOwned")) {
                                 for (auto& info : cond["excludedIfInfoOwned"]) {
-                                    ev.condition.excludedIfInfoOwned.push_back(info);
+                                    cd.excludedIfInfoOwned.push_back(info); // ev -> cd 로 수정
                                 }
                             }
 
@@ -99,23 +101,18 @@ void EventManager::loadEvents(const std::string& filename) {
                             if (cond.contains("turnsPassed")) {
                                 cd.turnsPassed = cond["turnsPassed"];
                             }
-
-                            // stat 조건
                             if (cond.contains("stat")) {
                                 cd.stat = cond["stat"];
                                 cd.min = cond.value("min", 0);
                             }
-                            // item 조건
                             if (cond.contains("item")) {
                                 cd.item = cond["item"];
                                 cd.min = cond.value("min", 1);
                             }
-                            // info 조건
                             if (cond.contains("info")) {
                                 cd.info = cond["info"];
                                 cd.min = cond.value("min", 1);
                             }
-                            // turn 조건
                             if (cond.contains("turn")) {
                                 cd.hasTurn = true;
                                 cd.turnValue = cond["turn"];
@@ -123,7 +120,6 @@ void EventManager::loadEvents(const std::string& filename) {
                             out.conditions.push_back(cd);
                         }
                     }
-
 
                     out.moneyDelta = o.value("moneyDelta", 0);
                     out.hpDelta = o.value("hpDelta", 0);
@@ -149,8 +145,6 @@ void EventManager::loadEvents(const std::string& filename) {
                 }
             }
 
-            
-
             if (c.contains("itemGains")) {
                 for (auto& item : c["itemGains"]) {
                     ch.itemGains.push_back({ item[0], item[1] });
@@ -169,8 +163,6 @@ void EventManager::loadEvents(const std::string& filename) {
                 }
             }
 
-
-
             ev.choices.push_back(ch);
         }
 
@@ -180,7 +172,6 @@ void EventManager::loadEvents(const std::string& filename) {
     std::cerr << "[DEBUG] Loaded events: " << events.size() << std::endl;
     std::cerr << "[DEBUG] Random pool size: " << randomPool.size() << std::endl;
 }
-
 Event& EventManager::getEvent(const std::string& id) {
     if (id == "random" || id == "random_once") {
         throw std::runtime_error("[FATAL] Attempted to fetch 'random' as event ID. Logic error!");

@@ -28,7 +28,10 @@ public:
     static void showCompleteGameOver();
     static void showCloneRevival();
     //static void showItemDrop(const std::string& itemName);
+
+    static void renderMainMenu();
     static void showReviveAnimation();
+    static void showGameOverAnimation();
 };
 
 // ✅ 내부 카드 출력용 (cpp 전용에서 정의)

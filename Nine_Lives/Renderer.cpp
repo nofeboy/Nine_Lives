@@ -7,6 +7,9 @@
 #include <thread>
 #include <chrono>
 #include <conio.h>
+#include <sstream>
+#include <algorithm>   
+#include <random>      
 
 #define RESET   u8"\033[0m"
 #define CYAN    u8"\033[36m"
@@ -103,7 +106,7 @@ static void drawChoiceBlock(int index, const string& text, bool locked, bool hig
 
     case 2: // UP
         arrow = "[UP] ";
-        baseY = CARD_POS_Y - 3;
+        baseY = CARD_POS_Y - 4;
         baseX = cardCenterX - (int)arrow.size() / 2 - 16;
         break;
 
@@ -448,19 +451,349 @@ void Renderer::renderChoices(const Event& ev, const Player& player, Direction) {
     cout.flush();
 }
 
+
 void Renderer::showReviveAnimation() {
+    using namespace std::chrono;
+
+    // ===== 콘솔 120x40 & ANSI 설정 =====
+    system("mode con cols=120 lines=40");
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD outMode = 0; GetConsoleMode(hOut, &outMode);
+    SetConsoleMode(hOut, outMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+//#ifndef BOLD
+//#  define BOLD "\x1b[1m"
+//#endif
+//#ifndef GREEN
+//#  define GREEN "\x1b[38;5;46m"
+//#endif
+//#ifndef RESET
+//#  define RESET "\x1b[0m"
+//#endif
+#ifndef DIM
+#  define DIM "\x1b[2m"
+#endif
+
+    // 커서 숨김
+    std::cout << "\x1b[?25l";
     ConsoleUtils::clearScreen();
-    std::string ascii =
-        "\n\n   ████  █    █ ██████  ██████\n"
-        "   █     █    █ █    █  █    █\n"
-        "   ████  █    █ ██████  █    █\n"
-        "   █     █    █ █   █   █    █\n"
-        "   █     ██████ █    █  ██████\n"
-        "\n[클론 바디 재부팅 중...]\n";
-    for (char c : ascii) {
-        std::cout << c << std::flush;
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    // ===== 1) 타겟 ASCII =====
+    std::string ascii = R"(
+
+.########..########.##.....##.####.##.....##.####.##....##..######..
+.##.....##.##.......##.....##..##..##.....##..##..###...##.##....##.
+.##.....##.##.......##.....##..##..##.....##..##..####..##.##.......
+.########..######...##.....##..##..##.....##..##..##.##.##.##...####.
+.##...##...##........##...##...##...##...##...##..##..####.##....##.
+.##....##..##.........##.##....##....##.##....##..##...###.##....##.
+.##.....##.########....###....####....###....####.##....##..######..
+
+                     [ Reviving clone body... ]
+)";
+
+    // ===== 2) 라인 분리 & 중앙 오프셋 =====
+    std::vector<std::string> lines;
+    {
+        std::stringstream ss(ascii);
+        std::string line;
+        while (std::getline(ss, line)) lines.push_back(line);
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(1200)); // 잠시 정지
+    size_t maxLen = 0;
+    for (auto& l : lines) maxLen = max(maxLen, l.size());
+
+    const int WIDTH = 120;
+    const int HEIGHT = 40;
+
+    int offsetX = max(0, (WIDTH - (int)maxLen) / 2);
+    int offsetY = max(0, (HEIGHT - (int)lines.size()) / 2);
+
+    // ===== 3) 매트릭스 레인: '세로 줄기' 상태 =====
+    std::mt19937 rng((unsigned)high_resolution_clock::now().time_since_epoch().count());
+
+    auto randChar = [&]() -> char {
+        static const char table[] = "001101100111000111010101010"
+            "23456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        std::uniform_int_distribution<int> d(0, (int)sizeof(table) - 2);
+        return table[d(rng)];
+        };
+
+    struct Column {
+        int x;
+        int headY;
+        int speed;      // 1~2 (속도)
+        int trail;      // 2~3 (잔상 길이, 최대 3)
+        int gap;        // 0~12 (다음 줄기 간격)
+        int cool;       // 현재 쿨타임
+        bool active;    // 줄기 진행 여부
+    };
+
+    std::vector<Column> cols(WIDTH);
+    std::uniform_int_distribution<int> spd(3, 4);
+    std::uniform_int_distribution<int> trl(2, 3);
+    std::uniform_int_distribution<int> gp(2, 8);
+    std::uniform_int_distribution<int> startY(0, HEIGHT - 1);
+    std::bernoulli_distribution wake(0.65);
+
+    auto resetCol = [&](Column& c) {
+        c.speed = spd(rng);
+        c.trail = trl(rng);
+        c.gap = gp(rng);
+        c.cool = 0;
+        c.headY = startY(rng);
+        c.active = true;
+        };
+
+    for (int x = 0; x < WIDTH; ++x) {
+        cols[x].x = x;
+        if (wake(rng)) resetCol(cols[x]);
+        else {
+            cols[x].active = false;
+            cols[x].cool = gp(rng);
+            cols[x].headY = startY(rng);
+            cols[x].trail = trl(rng);
+            cols[x].speed = spd(rng);
+            cols[x].gap = gp(rng);
+        }
+    }
+
+    // 셀 버퍼
+    std::vector<std::string> chBuf(HEIGHT, std::string(WIDTH, ' '));
+    std::vector<std::uint8_t> inten(HEIGHT * WIDTH, 0); // 0=없음,1=꼬리,2=몸통,3=헤드,4=ASCIIfix
+
+    auto putCell = [&](int y, int x, char c, std::uint8_t level) {
+        if (y < 0 || y >= HEIGHT || x < 0 || x >= WIDTH) return;
+        chBuf[y][x] = c;
+        size_t idx = (size_t)y * WIDTH + x;
+        if (level >= inten[idx]) inten[idx] = level;
+        };
+
+    auto drawFrame = [&]() {
+        std::cout << "\x1b[H";
+        for (int r = 0; r < HEIGHT; ++r) {
+            for (int c = 0; c < WIDTH; ++c) {
+                char out = chBuf[r][c];
+                std::uint8_t lv = inten[(size_t)r * WIDTH + c];
+                if (lv == 0 || out == ' ') { std::cout << ' '; continue; }
+                if (lv == 4) { std::cout << BOLD << GREEN << out << RESET; continue; }
+                if (lv == 3) { std::cout << BOLD << GREEN << out << RESET; continue; }
+                if (lv == 2) { std::cout << GREEN << out << RESET; continue; }
+                if (lv == 1) { std::cout << DIM << GREEN << out << RESET; continue; }
+            }
+            if (r != HEIGHT - 1) std::cout << '\n';
+        }
+        };
+
+    auto stepRain = [&](int ticks = 1) {
+        while (ticks--) {
+            for (int r = 0; r < HEIGHT; ++r) fill(chBuf[r].begin(), chBuf[r].end(), ' ');
+            fill(inten.begin(), inten.end(), 0);
+
+            for (auto& c : cols) {
+                if (!c.active) {
+                    if (--c.cool <= 0) { resetCol(c); }
+                    continue;
+                }
+                c.headY = (c.headY + c.speed) % HEIGHT;
+
+                for (int k = 0; k < c.trail; ++k) {
+                    int y = c.headY - k; if (y < 0) y += HEIGHT;
+                    char rc = randChar();
+                    if (k == 0) putCell(y, c.x, rc, 3);
+                    else if (k < 2) putCell(y, c.x, rc, 2);
+                    else putCell(y, c.x, rc, 1);
+                }
+
+                if (c.headY % (HEIGHT + c.trail) == 0) {
+                    c.active = false;
+                    c.cool = c.gap;
+                }
+            }
+        }
+        };
+
+    // ===== 4) 1단계: 레인만 흘리기 (풀화면) =====
+    const int rainOnlyFrames = 40;
+    for (int f = 0; f < rainOnlyFrames; ++f) {
+        stepRain(1);
+        drawFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    }
+
+    // ===== 5) 2단계: 타겟으로 수렴 (위에 덮어쓰며 고정) =====
+    struct Pos { int r, c; };
+    std::vector<Pos> targets;
+    for (int r = 0; r < (int)lines.size(); ++r)
+        for (int c = 0; c < (int)lines[r].size(); ++c)
+            if (lines[r][c] != ' ') targets.push_back({ r, c });
+    std::shuffle(targets.begin(), targets.end(), rng);
+
+    const int revealFrames = 70;
+    for (int f = 0; f < revealFrames; ++f) {
+        stepRain(1);
+
+        int revealCount = (int)((targets.size() * (f + 1)) / (double)revealFrames);
+
+        for (int i = 0; i < revealCount; ++i) {
+            int rr = offsetY + targets[i].r;
+            int cc = offsetX + targets[i].c;
+            putCell(rr, cc, lines[targets[i].r][targets[i].c], 4);
+        }
+
+        drawFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
+    }
+
+    // ===== 6) 최종 타겟 고정, 약간 유지 =====
+    {
+        stepRain(1);
+        for (int r = 0; r < (int)lines.size(); ++r) {
+            for (int c = 0; c < (int)lines[r].size(); ++c) {
+                if (lines[r][c] == ' ') continue;
+                putCell(offsetY + r, offsetX + c, lines[r][c], 4);
+            }
+        }
+        drawFrame();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+
+    // 커서 복구 & 클린업
+    std::cout << "\x1b[?25h" << RESET;
     ConsoleUtils::clearScreen();
+}
+
+
+
+
+void Renderer::renderMainMenu() {
+    ConsoleUtils::clearScreen();
+
+    const std::string intro = u8R"(
+
+  PROJECT NAME : NINE_LIVES
+  {
+      <load = C:\source\repos\Nine_Lives>
+      Please wait...................................................................................................100%
+      Complete!
+  }
+)";
+
+    const std::string asciiArt = u8R"(
+                 
+░▒▓███████▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░    ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░░▒▓███████▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░           ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░        
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░           ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░        
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒▒▓█▓▒░░▒▓██████▓▒░  ░▒▓██████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░           ░▒▓█▓▒░      ░▒▓█▓▒░ ░▒▓█▓▓█▓▒░ ░▒▓█▓▒░             ░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░           ░▒▓█▓▒░      ░▒▓█▓▒░ ░▒▓█▓▓█▓▒░ ░▒▓█▓▒░             ░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░    ░▒▓████████▓▒░▒▓█▓▒░  ░▒▓██▓▒░  ░▒▓████████▓▒░▒▓███████▓▒░  
+
+
+
+
+
+
+)";
+
+
+    const std::string outro = u8R"(
+  .....................................................................................................................)";
+
+    while (_kbhit()) _getch();
+    bool isPrinting = true;
+
+    std::cout << RED;
+
+    // 1) intro 타이핑 출력 (기존처럼)
+    for (char ch : intro) {
+        std::cout << ch << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if (_kbhit()) _getch();
+    }
+    //std::cout << RESET;
+
+    // 2) asciiArt 부분 처리
+    // - 아스키 아트 출력 시작 위치 고정 (예: 행 15, 열 10)
+    // - 영역 크기: 아스키 아트 크기
+    // - 매 프레임 열 하나씩 세로 방향으로 출력하면서 그 영역만 업데이트
+
+    // 라인 분리 + 최대 너비 계산 + 길이 맞추기
+    std::vector<std::string> lines;
+    {
+        std::stringstream ss(asciiArt);
+        std::string line;
+        size_t maxLen = 0;
+        while (getline(ss, line)) {
+            lines.push_back(line);
+            maxLen = max(maxLen, line.size());
+        }
+        for (auto& line : lines) {
+            if (line.size() < maxLen) line.append(maxLen - line.size(), ' ');
+        }
+    }
+
+    size_t height = lines.size();
+    size_t width = lines[0].size();
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // 아스키 아트 출력 시작 좌표 (원하는 위치로 조정)
+    const SHORT startX = 7;
+    const SHORT startY = 11;
+
+    // 화면에 그려질 현재 상태 버퍼 (빈 공백으로 초기화)
+    std::vector<std::string> screenBuffer(height, std::string(width, ' '));
+
+    for (size_t col = 0; col < width; ++col) {
+        // 이번 열 문자들 screenBuffer에 복사
+        for (size_t row = 0; row < height; ++row) {
+            screenBuffer[row][col] = lines[row][col];
+        }
+
+        // 화면에 현재 screenBuffer 출력 (영역만)
+        for (size_t row = 0; row < height; ++row) {
+            COORD cursorPos = { (SHORT)(startX), (SHORT)(startY + row) };
+            SetConsoleCursorPosition(hOut, cursorPos);
+            std::cout.write(screenBuffer[row].data(), screenBuffer[row].size());
+        }
+        std::cout.flush();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        while (_kbhit()) _getch();
+
+    }
+
+    // 3) outro 타이핑 출력 (기존처럼)
+    for (char ch : outro) {
+        std::cout << ch << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if (_kbhit()) _getch();
+
+    }
+    std::cout << RESET;
+
+    std::cout << std::endl;
+    cout << "\n";
+    std::cout << std::string(48, ' ') << YELLOW << "[ PRESS ANY KEY TO START ]" << RESET << std::endl;
+    std::cout << std::string(50, ' ') << GRAY << "  (PRESS ESC TO EXIT)" << RESET << std::endl;
+
+    isPrinting = false;
+
+
+}
+
+
+// 최종 게임 오버 애니메이션
+void Renderer::showGameOverAnimation() {
+    ConsoleUtils::clearScreen();
+    string msg = "\n\n   ALL CLONE BODIES DEPLETED. COMPLETE DEATH IMMINENT...\n";
+    for (char c : msg) {
+        cout << RED << c << RESET << flush;
+        this_thread::sleep_for(chrono::milliseconds(30));
+    }
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    cout << RED << "\n   REVENGE HAS FAILED." << RESET << endl;
+    this_thread::sleep_for(chrono::milliseconds(2000));
+    cout << "\n\n   (PRESS ANY KEY TO EXIT)" << endl;
+    _getch();
 }

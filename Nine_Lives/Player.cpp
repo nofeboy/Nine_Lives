@@ -52,13 +52,12 @@ void Player::useCloneBody() {
         //cloneBodies--;
 
         // ✅ 스탯 리셋
-        hp = 5;
-        sanity = 5;
+        hp = 4;
+        sanity = 4;
         money = 0;
-        strength = 1;
-        hacking = 1;
+        strength = 0;
+        hacking = 0;
         items.clear();
-        information.clear();
     }
 }
 
