@@ -25,6 +25,9 @@ struct Condition {
     std::string afterChoice;  // ★ 추가: 특정 선택 이후
     int turnsPassed = 0;      // ★ 추가: 그로부터 n턴 후
     std::vector<std::string> excludedIfChoiceMade; // 이 선택을 한 적 있으면 등장 X
+    int minScenarios = 0; // ★ 추가
+    std::vector<std::string> excludedIfInfoOwned; // 특정 정보가 있으면 등장 X
+
 };
 
 
