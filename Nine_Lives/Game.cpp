@@ -10,8 +10,11 @@
 #include <cstdlib>
 #include <ctime>
 #include <conio.h>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
 
 // 선택지 잠금 체크 함수
 bool Game::isChoiceLocked(const Choice& choice, const Player& player) {
@@ -36,7 +39,7 @@ void Game::run() {
 
     ConsoleUtils::enableANSI();
     ConsoleUtils::setUTF8();
-    ConsoleUtils::setConsoleSize(120, 40);
+    ConsoleUtils::setConsoleSize(120, 44);
     ConsoleUtils::disableResize();
     ConsoleUtils::hideCursor();
 
@@ -49,29 +52,59 @@ void Game::run() {
     while (true) {
         switch (currentState) {
         case GameState::MAIN_MENU: {
-            Renderer::renderMainMenu();
-            int key = _getch();
-            if (key == 27) return; // ESC 종료
+            // 1. 애니메이션을 먼저 한 번만 그립니다.
+            Renderer::renderMainMenu_Static();
 
-            // 게임 시작 초기화
-            //player.resetToDefault();
-            turnStarted = false;
-            turnCount = 0;
-            scenarioCount = 0;
-            playerHistory.clear();
-            choiceTurnHistory.clear();
-            currentEventId = "intro_1";
+            bool menuActive = true;
+            mainMenuSelection = 0;
 
-            // 상태
-            animateCard = true;      // ★ 첫 이벤트 애니 보장
-            previewMode = false;
-            lastDir = NONE;
-            lastRenderedEventId.clear();
+            // 불러오기 가능한지 미리 확인합니다.
+            std::ifstream saveFile("savegame.cbor");
+            bool canLoad = saveFile.good();
 
-            flushOnce = true;        // ★ 전이 직후 1회 버퍼 정리
-            currentState = GameState::PLAYING;
+            while (menuActive) {
+                // 2. 선택지만 계속해서 다시 그립니다.
+                Renderer::renderMainMenu_Dynamic(mainMenuSelection, canLoad);
+
+                int key = _getch();
+                if (key == 224) { // 방향키
+                    key = _getch();
+                    if (key == 72) { // 위
+                        mainMenuSelection = (mainMenuSelection - 1 + 3) % 3;
+                    }
+                    else if (key == 80) { // 아래
+                        mainMenuSelection = (mainMenuSelection + 1) % 3;
+                    }
+                }
+                else if (key == 13) { // 엔터
+                    switch (mainMenuSelection) {
+                    case 0: // 새 게임 시작
+                        menuActive = false; // 루프 탈출
+                        player.resetToDefault();
+                        // ... (새 게임 초기화 로직은 그대로) ...
+                        saveGame();
+                        currentState = GameState::PLAYING;
+                        break;
+                    case 1: // 이전 게임 불러오기
+                        if (canLoad) {
+                            menuActive = false; // 루프 탈출
+                            loadGame();
+                            animateCard = false; // 불러온 후에는 애니메이션 스킵
+                            currentState = GameState::PLAYING;
+                        }
+                        // 불러올 수 없으면 아무 동작 안 함
+                        break;
+                    case 2: // 종료
+                        return;
+                    }
+                }
+                else if (key == 27) { // ESC
+                    return;
+                }
+            }
             break;
         }
+
 
         case GameState::PLAYING: {
             // 전이 직후 한 번만 버퍼 비움(스킵 방지)
@@ -79,6 +112,7 @@ void Game::run() {
                 while (_kbhit()) _getch();
                 flushOnce = false;
             }
+
 
             // ★ revive_story 최우선 처리(다른 입력 전에)
             if (currentEventId == "revive_story") {
@@ -340,10 +374,14 @@ void Game::processChoice(int choiceIndex) {
     if (goingRandom) {
         scenarioCount++;
     }
+
+    saveGame();
+
 }
 
-// getNextEventId, checkEventCondition, getPlayerStat, isConditionMet 함수는
-// 이전과 동일하게 유지합니다.
+// Game.cpp
+
+// 이 함수 전체를 복사해서 기존의 getNextEventId 함수와 교체하세요.
 std::string Game::getNextEventId() {
     if (!forceNextEventId.empty()) {
         std::string id = forceNextEventId;
@@ -351,50 +389,93 @@ std::string Game::getNextEventId() {
         return id;
     }
 
-    std::vector<std::pair<std::string, Event*>> candidateForced;
+    // 1. 강제(forced) 이벤트 우선 확인
+    std::vector<std::string> candidateForced;
     for (auto& item : eventManager.events) {
         auto& ev = item.second;
-        if (ev.type == "forced" && checkEventCondition(ev)) {
-            candidateForced.push_back({ item.first, &ev });
+        // "forced" 타입이고, 아직 플레이어가 겪지 않았으며, 모든 조건을 만족하는지 확인
+        if (ev.type == "forced" && playerHistory.find(ev.id) == playerHistory.end() && checkEventCondition(ev)) {
+            candidateForced.push_back(item.first);
         }
     }
 
     if (!candidateForced.empty()) {
-        for (auto& candidate : candidateForced) {
-            if (candidate.first.find("death") != std::string::npos ||
-                candidate.first.find("clone") != std::string::npos) {
-                return candidate.first;
+        // 죽음/부활 관련 이벤트를 최우선으로 처리
+        for (auto& id : candidateForced) {
+            if (id.find("death") != std::string::npos || id.find("clone") != std::string::npos) {
+                return id;
             }
         }
-        return candidateForced[0].first;
+        return candidateForced[0];
     }
 
-    if (eventManager.randomPool.empty()) {
-        throw std::runtime_error("[FATAL] No random events available!");
-    }
-
+    // 2. 조건부 랜덤(random) 이벤트 확인
     std::vector<std::string> candidates;
-    for (auto& id : eventManager.randomPool) {
+    for (const auto& id : eventManager.randomPool) {
+        // 최근 등장 리스트에 없고, 조건을 만족하는 이벤트만 후보에 추가
         if (std::find(recentEvents.begin(), recentEvents.end(), id) == recentEvents.end()) {
-            candidates.push_back(id);
+            Event& ev = eventManager.getEvent(id);
+            if (checkEventCondition(ev)) {
+                candidates.push_back(id);
+            }
         }
     }
 
+    // 후보가 없으면, 최근 등장 리스트를 비우고 다시 시도
     if (candidates.empty()) {
         recentEvents.clear();
-        candidates = eventManager.randomPool;
+        for (const auto& id : eventManager.randomPool) {
+            Event& ev = eventManager.getEvent(id);
+            if (checkEventCondition(ev)) {
+                candidates.push_back(id);
+            }
+        }
     }
 
+    // 그래도 후보가 없다면 비상상황 (모든 랜덤 이벤트 조건이 안맞음)
+    if (candidates.empty()) {
+        // 이 경우, 기본 이벤트나 안전한 이벤트를 반환하거나 예외 처리를 할 수 있습니다.
+        // 여기서는 간단하게 첫번째 인트로 이벤트로 돌아가도록 처리합니다.
+        return "intro_1";
+    }
+
+    // 최종 후보 중에서 무작위로 하나 선택
     int idx = rand() % candidates.size();
     std::string chosen = candidates[idx];
 
+    // 최근 등장 목록에 추가
     recentEvents.push_back(chosen);
-    if (recentEvents.size() > 5) recentEvents.pop_front();
+    if (recentEvents.size() > 5) { // 최근 5개까지 기억
+        recentEvents.pop_front();
+    }
 
     return chosen;
 }
+// Game.cpp
 
+// 이 함수 전체를 복사해서 기존의 checkEventCondition 함수와 교체하세요.
 bool Game::checkEventCondition(const Event& ev) {
+    // afterChoice 및 turnsPassed 조건 검사
+    if (!ev.condition.afterChoice.empty() && ev.condition.turnsPassed > 0) {
+        auto it = choiceTurnHistory.find(ev.condition.afterChoice);
+        if (it == choiceTurnHistory.end()) {
+            return false; // 해당 선택을 한 기록이 없으면 false
+        }
+
+        // 해당 선택을 한 모든 턴 기록을 확인
+        bool time_passed = false;
+        for (int choiceTurn : it->second) {
+            if (turnCount - choiceTurn >= ev.condition.turnsPassed) {
+                time_passed = true;
+                break;
+            }
+        }
+        if (!time_passed) {
+            return false; // 턴 수가 충족되지 않으면 false
+        }
+    }
+
+
     // excludedIfInfoOwned 조건 검사: 플레이어가 해당 정보를 1개 이상 가지고 있으면 제외
     for (const auto& blockedInfo : ev.condition.excludedIfInfoOwned) {
         auto it = player.information.find(blockedInfo);
@@ -428,7 +509,7 @@ bool Game::checkEventCondition(const Event& ev) {
         }
     }
 
-    // 제외할 선택지 검사(이 부분은 만약 있으면 추가)
+    // 제외할 선택지 검사
     for (const auto& blockedChoice : ev.condition.excludedIfChoiceMade) {
         if (playerHistory.find(blockedChoice) != playerHistory.end()) {
             return false;
@@ -437,7 +518,6 @@ bool Game::checkEventCondition(const Event& ev) {
 
     return true;
 }
-
 int Game::getPlayerStat(const Player& player, const std::string& statName) {
     if (statName == "strength") return player.strength;
     if (statName == "hacking") return player.hacking;
@@ -487,6 +567,59 @@ bool Game::isConditionMet(const Condition& cond, const Player& player, int turnC
 
     if (cond.hasTurn) {
         return turnCount >= cond.turnValue;
+    }
+
+    return true;
+}
+
+void Game::saveGame() {
+    json saveData;
+    saveData["player"] = player;
+    saveData["currentEventId"] = currentEventId;
+    saveData["turnCount"] = turnCount;
+    saveData["scenarioCount"] = scenarioCount;
+    saveData["recentEvents"] = recentEvents;
+    saveData["playerHistory"] = playerHistory;
+    saveData["choiceTurnHistory"] = choiceTurnHistory;
+    saveData["turnStarted"] = turnStarted;
+
+    // json 객체를 cbor 포맷의 바이너리 데이터로 변환
+    std::vector<uint8_t> cbor_data = json::to_cbor(saveData);
+
+    // 바이너리 파일로 저장
+    std::ofstream file("savegame.cbor", std::ios::binary);
+    if (file.is_open()) {
+        file.write(reinterpret_cast<const char*>(cbor_data.data()), cbor_data.size());
+    }
+}
+
+
+bool Game::loadGame() {
+    // 바이너리 파일로 읽기
+    std::ifstream file("savegame.cbor", std::ios::binary);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    // 파일 내용을 vector<uint8_t>로 읽어들임
+    std::vector<uint8_t> cbor_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+    try {
+        // cbor 바이너리 데이터를 json 객체로 변환
+        json saveData = json::from_cbor(cbor_data);
+
+        player = saveData.at("player").get<Player>();
+        currentEventId = saveData.at("currentEventId").get<std::string>();
+        turnCount = saveData.at("turnCount").get<int>();
+        scenarioCount = saveData.at("scenarioCount").get<int>();
+        recentEvents = saveData.at("recentEvents").get<std::deque<std::string>>();
+        playerHistory = saveData.at("playerHistory").get<std::unordered_set<std::string>>();
+        choiceTurnHistory = saveData.at("choiceTurnHistory").get<std::unordered_map<std::string, std::vector<int>>>();
+        turnStarted = saveData.at("turnStarted").get<bool>();
+    }
+    catch (const json::exception&) {
+        // 파일이 손상되었거나 내용이 잘못된 경우
+        return false;
     }
 
     return true;

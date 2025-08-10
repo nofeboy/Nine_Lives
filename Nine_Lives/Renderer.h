@@ -29,7 +29,9 @@ public:
     static void showCloneRevival();
     //static void showItemDrop(const std::string& itemName);
 
-    static void renderMainMenu();
+    static void renderMainMenu_Static();      // 애니메이션 등 정적 부분
+    static void renderMainMenu_Dynamic(int selection, bool canLoad); // 선택지 등 동적 부분
+
     static void showReviveAnimation();
     static void showGameOverAnimation();
 };

@@ -1,15 +1,12 @@
-﻿// Nine_Lives/Game.h
-
-#pragma once
+﻿#pragma once
 #include <string>
 #include "Player.h"
 #include "EventManager.h"
 #include "Input.h"
 #include <deque>
-#include <windows.h> 
+#include <windows.h>
 #include <unordered_set>
 
-// 게임 상태를 나타내는 열거형 추가
 enum class GameState {
     MAIN_MENU,
     PLAYING,
@@ -27,12 +24,16 @@ private:
     EventManager eventManager;
     std::string currentEventId = "intro_1";
     GameState currentState = GameState::MAIN_MENU; // 현재 게임 상태 변수 추가
+    int mainMenuSelection = 0; // 메인 메뉴 선택 인덱스
 
     Direction lastDir = NONE;
     bool previewMode = false;
     bool animateCard = true;
 
     void processChoice(int choiceIndex);
+    void saveGame();
+    bool loadGame();
+
     std::string forceNextEventId;
     std::deque<std::string> recentEvents;
     std::string getNextEventId();

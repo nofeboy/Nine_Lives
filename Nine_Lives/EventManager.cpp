@@ -24,6 +24,15 @@ void EventManager::loadEvents(const std::string& filename) {
             auto cond = e["condition"];
             ev.condition.minTurns = cond.value("minTurns", 0);
             ev.condition.minScenarios = cond.value("minScenarios", 0);
+
+
+            if (cond.contains("afterChoice")) {
+                ev.condition.afterChoice = cond["afterChoice"];
+            }
+            if (cond.contains("turnsPassed")) {
+                ev.condition.turnsPassed = cond["turnsPassed"];
+            }
+
             if (cond.contains("stats") && !cond["stats"].is_null()) {
                 for (auto& item : cond["stats"].items()) {
                     StatCondition sc;
@@ -45,7 +54,11 @@ void EventManager::loadEvents(const std::string& filename) {
                     ev.condition.requiredChoices.push_back(ch);
                 }
             }
-            // ★★★★★ 여기는 ev.condition이 맞습니다. (이벤트 자체의 조건) ★★★★★
+            if (cond.contains("excludedIfChoiceMade")) { // ★★★★★ 추가
+                for (auto& ch : cond["excludedIfChoiceMade"]) {
+                    ev.condition.excludedIfChoiceMade.push_back(ch);
+                }
+            }
             if (cond.contains("excludedIfInfoOwned")) {
                 for (auto& info : cond["excludedIfInfoOwned"]) {
                     ev.condition.excludedIfInfoOwned.push_back(info);
@@ -58,7 +71,7 @@ void EventManager::loadEvents(const std::string& filename) {
             randomPool.push_back(ev.id);
         }
         else if (type == "forced") {
-            // "forced" 타입 이벤트는 별도로 처리하지 않아도 getNextEventId에서 전체를 순회합니다.
+            // "forced" 타입 이벤트는 별도로 처리하지 않아도 getNextEventId에서 전체를 순회
         }
 
         for (auto& c : e["choices"]) {
@@ -169,9 +182,9 @@ void EventManager::loadEvents(const std::string& filename) {
         events[ev.id] = ev;
     }
 
-    std::cerr << "[DEBUG] Loaded events: " << events.size() << std::endl;
-    std::cerr << "[DEBUG] Random pool size: " << randomPool.size() << std::endl;
 }
+
+
 Event& EventManager::getEvent(const std::string& id) {
     if (id == "random" || id == "random_once") {
         throw std::runtime_error("[FATAL] Attempted to fetch 'random' as event ID. Logic error!");
