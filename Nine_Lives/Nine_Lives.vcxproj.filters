@@ -30,9 +30,6 @@
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Nine_Lives.cpp">
-      <Filter>리소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -47,9 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="events.json">
-      <Filter>리소스 파일</Filter>
-    </None>
-    <None Include="nine_lives_story.json">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>

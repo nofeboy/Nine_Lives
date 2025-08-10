@@ -35,6 +35,8 @@ static void sleep_ms(int ms) {
     this_thread::sleep_for(chrono::milliseconds(ms));
 }
 
+
+
 // ✅ 문자열 실제 출력 폭 계산 (한글 대응)
 int getDisplayWidth(const string& text) {
     int width = 0;
@@ -48,6 +50,19 @@ int getDisplayWidth(const string& text) {
     }
     return width;
 }
+
+
+// ✅ 화면 중앙에 텍스트를 출력하는 헬퍼 함수
+void printCentered(const std::string& text, int y_offset) {
+    int textWidth = getDisplayWidth(text);
+    int padding = (SCREEN_WIDTH - textWidth) / 2;
+    if (padding < 0) padding = 0;
+
+    // y_offset을 사용하여 특정 라인에 출력
+    std::cout << "\033[" << y_offset << ";1H";
+    std::cout << std::string(padding, ' ') << text << std::endl;
+}
+
 
 //선택지 줄 자동 정리
 vector<string> wrapChoiceText(const string& text, int maxWidth) {
@@ -666,7 +681,7 @@ void Renderer::showReviveAnimation() {
 
 
 
-void Renderer::renderMainMenu() {
+void Renderer::renderMainMenu_Static() {
     ConsoleUtils::clearScreen();
 
     const std::string intro = u8R"(
@@ -771,15 +786,37 @@ void Renderer::renderMainMenu() {
 
     }
     std::cout << RESET;
-
     std::cout << std::endl;
     cout << "\n";
-    std::cout << std::string(48, ' ') << YELLOW << "[ PRESS ANY KEY TO START ]" << RESET << std::endl;
-    std::cout << std::string(50, ' ') << GRAY << "  (PRESS ESC TO EXIT)" << RESET << std::endl;
-
-    isPrinting = false;
+}
 
 
+void Renderer::renderMainMenu_Dynamic(int selection, bool canLoad) {
+    std::vector<std::string> menuItems = { u8"새 게임 시작", u8"이전 게임 불러오기", u8"종료" };
+    int start_line = 25; // 메뉴 항목을 출력할 시작 줄 번호 (조정 가능)
+
+    for (int i = 0; i < menuItems.size(); ++i) {
+        std::string menuItemText;
+        std::string finalColor;
+
+        if (i == 1 && !canLoad) { // '이전 게임 불러오기'가 불가능할 때
+            finalColor = GRAY;
+            menuItemText = u8"  " + menuItems[i];
+        }
+        else if (i == selection) { // 현재 선택된 항목
+            finalColor = YELLOW;
+            menuItemText = u8"➤ " + menuItems[i];
+        }
+        else { // 그 외 항목
+            finalColor = WHITE;
+            menuItemText = u8"  " + menuItems[i];
+        }
+
+        // 특정 라인에 중앙 정렬하여 출력
+        std::cout << finalColor;
+        printCentered(menuItemText, start_line + i);
+        std::cout << RESET;
+    }
 }
 
 

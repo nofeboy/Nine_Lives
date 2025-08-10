@@ -54,7 +54,7 @@ void Player::useCloneBody() {
         // ✅ 스탯 리셋
         hp = 4;
         sanity = 4;
-        money = 0;
+        money = 1;
         strength = 0;
         hacking = 0;
         items.clear();
@@ -68,7 +68,7 @@ void Player::resetToDefault() {
     hp = 7;
     sanity = 7;
     money = 3;
-    cloneBodies = 9;
+    cloneBodies = 0;
     items.clear();
     information.clear();
 }
@@ -82,3 +82,32 @@ void Player::applyStatLimits() {
     money = std::max(0, money);
     cloneBodies = std::max(0, std::min(9, cloneBodies));
 }
+
+
+// Player -> json 변환
+void to_json(nlohmann::json& j, const Player& p) {
+    j = nlohmann::json{
+        {"strength", p.strength},
+        {"hacking", p.hacking},
+        {"hp", p.hp},
+        {"sanity", p.sanity},
+        {"money", p.money},
+        {"cloneBodies", p.cloneBodies},
+        {"items", p.items},
+        {"information", p.information}
+    };
+}
+
+// json -> Player 변환
+void from_json(const nlohmann::json& j, Player& p) {
+    j.at("strength").get_to(p.strength);
+    j.at("hacking").get_to(p.hacking);
+    j.at("hp").get_to(p.hp);
+    j.at("sanity").get_to(p.sanity);
+    j.at("money").get_to(p.money);
+    j.at("cloneBodies").get_to(p.cloneBodies);
+    j.at("items").get_to(p.items);
+    j.at("information").get_to(p.information);
+}
+
+

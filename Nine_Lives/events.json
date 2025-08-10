@@ -969,7 +969,6 @@
       "choices": [
         {
           "text": "많이 불안한가보다. 냅두자.",
-          "hpDelta": -6,
           "nextEventId": "r_7_raiding_2_1"
         },
         {
@@ -985,6 +984,7 @@
       "choices": [
         {
           "text": "계속...",
+          "hpDelta": -6,
           "nextEventId": "random"
         }
       ]
@@ -1027,7 +1027,7 @@
           "requiredItems": [ "권총" ],
           "moneyDelta": 3,
           "sanityDelta": -2,
-          "itemGains": [ [ "바이오-담배", 1 ] ],
+          "itemGains": [ [ "오가닉-담배", 1 ] ],
           "nextEventId": "r_7_raiding_2_5"
         }
       ]
@@ -1043,6 +1043,492 @@
         }
       ]
     },
+
+
+
+
+
+    {
+      "id": "r_8_alley_plea",
+      "type": "random",
+      "description": "어두운 골목에서 한 남자가 고장난 의수를 붙잡고 끙끙 앓고 있다. 의수에서 스파크가 튀고 있다.",
+      "condition": {
+        "excludedIfInfoOwned": [ "불법 사이버웨어 의사" ]
+      },
+      "choices": [
+        {
+          "text": "힘으로 의수를 강제로 분리한다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "strength",
+                  "min": 1
+                }
+              ],
+              "moneyDelta": 1,
+              "nextEventId": "r_8_alley_success"
+            }
+          ],
+          "hpDelta": -1,
+          "nextEventId": "r_8_alley_fail"
+        },
+        {
+          "text": "의수의 제어 시스템을 해킹해서 안정시킨다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "hacking",
+                  "min": 1
+                }
+              ],
+              "moneyDelta": 1,
+              "nextEventId": "r_8_alley_success"
+            }
+          ],
+          "hpDelta": -1,
+          "nextEventId": "r_8_alley_fail"
+        },
+        {
+          "text": "무시하고 지나간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_8_alley_fail",
+      "type": "story",
+      "description": "(HP -1)\n당신이 어설프게 의수를 만지자, 의수가 폭주하며 당신을 밀쳐냈다. 남자는 더 큰 고통에 비명을 지른다.",
+      "choices": [
+        {
+          "text": "자리를 뜬다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_8_alley_success",
+      "type": "story",
+      "description": "(돈 +1)\n당신의 도움으로 남자는 겨우 진정했다. \"고맙소, 덕분에 살았군. 이건 내 작은 성의일세.\" 남자가 1원을 건넨다.",
+      "choices": [
+        {
+          "text": "이야기를 더 들어본다.",
+          "nextEventId": "r_8_alley_info"
+        },
+        {
+          "text": "갈 길을 간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_8_alley_info",
+      "type": "story",
+      "description": "\"사실... 이 의수는 불법 시술을 받은 거라 공식 수리점에 갈 수가 없었소. 혹시 당신도 '그런' 도움이 필요하면... 이 사람을 찾아가 보게나.\"\n(정보 '불법 사이버웨어 의사' 획득)",
+      "choices": [
+        {
+          "text": "정보를 얻고 자리를 떠난다.",
+          "informationGains": [ [ "불법 사이버웨어 의사", 1 ] ],
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+
+
+
+    {
+      "id": "r_9_ripperdoc_entry",
+      "type": "random_once",
+      "description": "당신은 예전에 얻었던 불법 시술 정보를 따라 뒷골목의 한 허름한 건물 지하로 내려갔다.",
+      "condition": {
+        "afterChoice": "r_8_alley_info:정보를 얻고 자리를 떠난다.",
+        "turnsPassed": 25,
+        "excludedIfChoiceMade": [ "r_9_ripperdoc_entry:의사를 만난다." ]
+      },
+      "choices": [
+        {
+          "text": "의사를 만난다.",
+          "nextEventId": "r_9_ripperdoc_intro"
+        },
+        {
+          "text": "역시 위험해 보인다. 떠난다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_intro",
+      "type": "story",
+      "description": "소독약 냄새와 함께 기계 부품을 만지작거리던 의사가 당신을 힐끗 쳐다본다.\n\n\"...새 손님인가? 보아하니 '공식적인' 절차를 밟을 형편은 아닌 것 같군. 뭘 원하지?\"",
+      "choices": [
+        {
+          "text": "거래를 시작한다.",
+          "nextEventId": "r_9_ripperdoc_choices"
+        },
+        {
+          "text": "조용히 이곳을 떠난다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_choices",
+      "type": "story",
+      "description": "의사가 진열대의 사이버웨어 몇 개를 가리킨다.",
+      "choices": [
+        {
+          "text": "[돈 -3] 강화 의수를 이식받는다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "money",
+                  "min": 3
+                }
+              ],
+              "moneyDelta": -3,
+              "strengthDelta": 2,
+              "itemGains": [ [ "강화 의수", 1 ] ],
+              "nextEventId": "r_9_ripperdoc_get_arm"
+            }
+          ],
+          "nextEventId": "r_9_ripperdoc_no_money"
+        },
+        {
+          "text": "[돈 -3] 코딩용 안구를 이식받는다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "money",
+                  "min": 3
+                }
+              ],
+              "moneyDelta": -3,
+              "hackingDelta": 2,
+              "itemGains": [ [ "코딩용 안구", 1 ] ],
+              "nextEventId": "r_9_ripperdoc_get_eye"
+            }
+          ],
+          "nextEventId": "r_9_ripperdoc_no_money"
+        },
+        {
+          "text": "[힘 3] 의사를 협박해 공짜로 시술을 받는다.",
+          "reqStrength": 3,
+          "nextEventId": "r_9_ripperdoc_threat_success_choice"
+        },
+        {
+          "text": "조용히 이곳을 떠난다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_no_money",
+      "type": "story",
+      "description": "\"이봐, 돈은 갖고 온 건가?\" 의사가 비웃으며 말했다.",
+      "choices": [
+        {
+          "text": "다음에 다시 온다.",
+          "nextEventId": "r_9_ripperdoc_choices"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_get_arm",
+      "type": "story",
+      "description": "(돈 -3, 힘 +2, 아이템 '강화 의수' 획득)\n끔찍한 고통과 함께, 당신의 팔은 이제 강철도 찢을 수 있을 것처럼 강력해졌다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_get_eye",
+      "type": "story",
+      "description": "(돈 -3, 해킹 +2, 아이템 '코딩용 안구' 획득)\n눈알을 뽑아내는 듯한 시술 이후, 세상의 모든 디지털 정보가 눈앞에 흐르는 것처럼 보인다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_threat_success_choice",
+      "type": "story",
+      "description": "당신의 험악한 기세에 의사는 군말 없이 손을 들었다. \"원하는 게 뭐든... 조용히 끝내자고.\"",
+      "choices": [
+        {
+          "text": "강화 의수를 이식하게 한다.",
+          "strengthDelta": 2,
+          "itemGains": [ [ "강화 의수", 1 ] ],
+          "informationGains": [ [ "블랙리스트", 1 ] ],
+          "nextEventId": "r_9_ripperdoc_threat_get_arm"
+        },
+        {
+          "text": "코딩용 안구를 이식하게 한다.",
+          "hackingDelta": 2,
+          "itemGains": [ [ "코딩용 안구", 1 ] ],
+          "informationGains": [ [ "블랙리스트", 1 ] ],
+          "nextEventId": "r_9_ripperdoc_threat_get_eye"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_threat_get_arm",
+      "type": "story",
+      "description": "(힘 +2, 아이템 '강화 의수' 획득, 정보 '수배 중!' 획득)\n의사는 떨리는 손으로 당신에게 강화 의수를 이식했다. 공짜 시술은 달콤했지만, 대신 당신은 의사 협회의 블랙리스트에 올랐다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_9_ripperdoc_threat_get_eye",
+      "type": "story",
+      "description": "(해킹 +2, 아이템 '코딩용 안구' 획득, 정보 '수배 중!' 획득)\n의사는 떨리는 손으로 당신에게 코딩용 안구를 이식했다. 새로운 세상이 보이는 것 같지만, 대신 당신은 의사 협회의 블랙리스트에 올랐다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+    {
+      "id": "r_10_hotline",
+      "type": "random",
+      "description": "골목 한구석에 버려진 '쌍용 콜센터'의 고객 응대용 키오스크가 보인다. 전원은 들어와 있지만, 관리자 모드의 로그인 창이 깜빡이고 있다.",
+      "choices": [
+        {
+          "text": "[해킹] 보안을 우회하여 고객 지원금을 빼돌린다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "hacking",
+                  "min": 5
+                }
+              ],
+              "nextEventId": "r_10_hotline_critical_success"
+            },
+            {
+              "conditions": [
+                {
+                  "stat": "hacking",
+                  "min": 2
+                }
+              ],
+              "nextEventId": "r_10_hotline_success"
+            }
+          ],
+          "nextEventId": "r_10_hotline_fail"
+        },
+        {
+          "text": "위험해 보인다. 그냥 지나간다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_10_hotline_critical_success",
+      "type": "story",
+      "description": "(해킹 +1, 돈 +5)\n당신은 관리자 권한을 넘어 시스템 전체를 장악했다. 고객 지원금 예산의 일부를 당신의 계좌로 완벽하게 빼돌렸다. 이런 짜릿한 성공은 당신의 해킹 실력을 한 단계 성장시켰다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "hackingDelta": 1,
+          "moneyDelta": 5,
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_10_hotline_success",
+      "type": "story",
+      "description": "(돈 +2)\n기초적인 보안을 뚫고 관리자 계정에 접근했다. 소액의 지원금을 이체하는 데 성공했지만, 더 깊이 들어가는 것은 위험해 보인다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "moneyDelta": 2,
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_10_hotline_fail",
+      "type": "story",
+      "description": "(HP -1, 정신력 -1)\n당신의 어설픈 해킹은 즉시 발각되었다. 조용한 경보와 함께 근처의 순찰 드론이 당신을 향해 날아온다! 당신은 급하게 도망치다 넘어져 부상을 입었다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "hpDelta": -1,
+          "sanityDelta": -1,
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
+
+
+    {
+      "id": "r_12_armored_ganger",
+      "type": "random_once",
+      "condition": {
+        "minScenarios": 8
+      },
+      "description": "\"꼼짝 마!\" 육중한 강화복을 입은 깡패가 상점 주인의 머리에 총구를 겨누고 있다. 일반적인 총알은 흠집도 내기 어려워 보인다.",
+      "choices": [
+        {
+          "text": "강화복을 힘으로 뜯어낸다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "strength",
+                  "min": 4
+                }
+              ],
+              "nextEventId": "r_12_armored_ganger_str_success"
+            }
+          ],
+          "hpDelta": -2,
+          "nextEventId": "r_12_armored_ganger_str_fail"
+        },
+        {
+          "text": "[해킹 4] 강화복의 동력원을 해킹하여 무력화한다.",
+          "outcomes": [
+            {
+              "conditions": [
+                {
+                  "stat": "hacking",
+                  "min": 4
+                }
+              ],
+              "nextEventId": "r_12_armored_ganger_hack_success"
+            }
+          ],
+          "sanityDelta": -2,
+          "nextEventId": "r_12_armored_ganger_hack_fail"
+        },
+        {
+          "text": "[소형 수류탄 키링] 강화복의 틈새로 수류탄을 던져 넣는다.",
+          "requiredItems": [ "소형 수류탄 키링" ],
+          "nextEventId": "r_12_armored_ganger_grenade_success"
+        },
+        {
+          "text": "상황을 지켜본다.",
+          "nextEventId": "r_12_armored_ganger_observe"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_str_success",
+      "type": "story",
+      "description": "(돈 +2, 아이템 '강화복 파편' 획득)\n당신은 깡패에게 달려들어 강화복의 관절 부분을 힘으로 비틀어 뜯어냈다! 동력을 잃고 쓰러진 깡패를 뒤로하고, 상점 주인이 감사의 의미로 돈과 파편을 건넸다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "moneyDelta": 2,
+          "itemGains": [ [ "강화복 파편", 1 ] ],
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_str_fail",
+      "type": "story",
+      "description": "(HP -2)\n당신의 힘은 강화복에 흠집 하나 내지 못했다. 깡패는 당신을 비웃으며 어깨로 강하게 들이받았다. 갈비뼈 몇 개는 나간 것 같다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_hack_success",
+      "type": "story",
+      "description": "(돈 +1, 정보 '불법 무기상 연락처' 획득)\n당신은 깡패의 강화복 시스템에 침투해 동력을 차단했다. 깡패가 깡통 안에 갇혀 허우적대는 동안 상점 주인이 감사를 표하며 약간의 돈과 정보를 주었다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "moneyDelta": 1,
+          "informationGains": [ [ "불법 무기상 연락처", 1 ] ],
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_hack_fail",
+      "type": "story",
+      "description": "(정신력 -2)\n강화복의 방화벽이 당신의 해킹을 역으로 추적해 뇌에 직접적인 피드백 공격을 가했다! 당신은 비명을 지르며 도망쳤다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_grenade_success",
+      "type": "story",
+      "description": "(돈 +3, 아이템 '강화복 파편' 획득)\n당신은 키링을 뜯어 수류탄을 활성화하고, 강화복의 목 부분 틈새로 정확히 던져 넣었다. 잠시 후, 헬멧 안에서 조용한 폭발음과 함께 깡패가 쓰러졌다. 상점 주인은 당신의 깔끔한 일처리에 감탄하며 두둑한 보상을 주었다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "moneyDelta": 3,
+          "itemGains": [
+            [ "소형 수류탄 키링", -1 ],
+            [ "강화복 파편", 1 ]
+          ],
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_observe",
+      "type": "story",
+      "description": "깡패가 상점 주인을 거칠게 밀치며 돈을 요구하고 있다. 당신이 개입할 마지막 기회인 것 같다.",
+      "choices": [
+        {
+          "text": "\"그만둬!\" 소리쳐서 주의를 끈다.",
+          "hpDelta": -1,
+          "nextEventId": "r_12_armored_ganger_observe_shout"
+        },
+        {
+          "text": "조용히 자리를 뜬다.",
+          "nextEventId": "random"
+        }
+      ]
+    },
+    {
+      "id": "r_12_armored_ganger_observe_shout",
+      "type": "story",
+      "description": "(HP -1)\n깡패의 시선이 당신에게 향했다. \"영웅 납셨네.\" 그가 쏜 총알이 당신의 팔을 스쳤다. 그 틈에 상점 주인이 도망쳤고, 깡패는 혀를 차며 자리를 떴다. 좋은 일을 했지만 상처만 남았다.",
+      "choices": [
+        {
+          "text": "계속...",
+          "nextEventId": "random"
+        }
+      ]
+    },
+
+
 
 
 
